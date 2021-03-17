@@ -1,4 +1,13 @@
 {
-  "name": "backend/training",
-  "description": "learning focus: composer install package, composer auto load, sql join, array sort, php abstract class, php interface, php return type, php psr-4"
+  "require": {
+    "vlucas/phpdotenv": "^5.3",
+    "opis/database": "^4.2",
+    "ext-json": "*",
+    "ext-pdo": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "App\\": "app/"
+    }
+  }
 }
