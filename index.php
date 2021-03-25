@@ -12,7 +12,6 @@ $dotenv->load();
 $pdo = DB::init()->pdo();
 
 $databaseController = new DatabaseController($pdo);
-$districts = $databaseController->showDistricts();
 
 do {
     $command = strtolower(readline('重新匯入資料?[y/n/quit]: '));
@@ -20,7 +19,12 @@ do {
         case 'y':
         case 'yes':
             $askAgain = false;
-            $databaseController->importData();
+            try {
+                $databaseController->importData();
+            } catch (Exception $e) {
+                echo $e->getMessage();
+                die();
+            }
             break;
         case 'n':
         case 'no':
@@ -39,6 +43,11 @@ do {
 statistics:
 echo '=================================='.PHP_EOL;
 do {
+    try {
+        $districts = $databaseController->showDistricts();
+    } catch (Exception $e) {
+        die("DB error!!");
+    }
     $command = strtolower(readline('顯示何種資料?'.PHP_EOL.'1:行政區排序檢驗 2:統計 [1/2/quit]: '));
     switch ($command) {
         case '1':
