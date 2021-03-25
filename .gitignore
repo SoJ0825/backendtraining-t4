@@ -2,3 +2,7 @@
 .env
 .env.backup
 /.idea
+DbcTest.php
+ImportTest.php
+StrTest.php
+DbTest.php

@@ -12,15 +12,19 @@ $dotenv->load();
 $pdo = DB::init()->pdo();
 
 $databaseController = new DatabaseController($pdo);
-$districts = $databaseController->showDistricts();
 
 do {
-    $command = strtolower(readline('重新匯入資料?[y/n/quit]: '));
+    $command = strtolower(readline('Import data again?[y/n/quit]: '));
     switch ($command) {
         case 'y':
         case 'yes':
             $askAgain = false;
-            $databaseController->importData();
+            try {
+                $databaseController->importData();
+            } catch (Exception $e) {
+                echo $e->getMessage();
+                die();
+            }
             break;
         case 'n':
         case 'no':
@@ -39,7 +43,12 @@ do {
 statistics:
 echo '=================================='.PHP_EOL;
 do {
-    $command = strtolower(readline('顯示何種資料?'.PHP_EOL.'1:行政區排序檢驗 2:統計 [1/2/quit]: '));
+    try {
+        $districts = $databaseController->showDistricts();
+    } catch (Exception $e) {
+        die("DB error!!");
+    }
+    $command = strtolower(readline('What kind of data to display?'.PHP_EOL.'1:District sort 2:Rainfall statistics [1/2/quit]: '));
     switch ($command) {
         case '1':
             $askAgain = true;
@@ -62,7 +71,7 @@ do {
 totalRainfall:
 echo '=================================='.PHP_EOL;
 do {
-    $command = strtolower(readline('顯示何種資料?'.PHP_EOL.'1:年度總雨量 2:月份總雨量 [1/2/back/quit]: '));
+    $command = strtolower(readline('What kind of data to display?'.PHP_EOL.'1:Total annual rainfall 2:Total monthly rainfall [1/2/back/quit]: '));
     switch ($command) {
         case '1':
             $sumBy = 'year';
@@ -88,7 +97,7 @@ do {
 selectArea:
 echo '=================================='.PHP_EOL;
 do {
-    $command = strtolower(readline('選擇區域?'.PHP_EOL.'1:全部行政區 2:指定行政區 [1/2/back/quit]: '));
+    $command = strtolower(readline('Select districts?'.PHP_EOL.'1:All districts 2:Designated district [1/2/back/quit]: '));
     switch ($command) {
         case '1':
             if ($sumBy === 'year') var_export($databaseController->sumByYear());
@@ -116,7 +125,7 @@ echo '=================================='.PHP_EOL;
 var_export($districts);
 echo PHP_EOL;
 do {
-    $command = strtolower(readline('選擇行政區? [0~'.(count($districts) - 1).'/back/quit]: '));
+    $command = strtolower(readline('Select districts? [0~'.(count($districts) - 1).'/back/quit]: '));
     switch ($command) {
         case 'b':
         case 'back':
