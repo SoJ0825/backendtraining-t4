@@ -77,6 +77,20 @@ class DatabaseController implements RainfallSchema, CollectData
         return $result;
     }
 
+    public function confirmDistrict($district, $sql)
+    {
+        if (is_null($district)) {
+            $sql = str_replace('WHERE districts_id = :districts_id', '', $sql);
+            $statement = $this->pdo->prepare($sql);
+            return $statement;
+        } else {
+            $districtId = $this->findDistrictId($district);
+            $statement = $this->pdo->prepare($sql);
+            $statement->bindParam(':districts_id', $districtId, PDO::PARAM_STR);
+            return $statement;
+        }
+    }
+
     //
     public function createRainfallsTable()
     {
@@ -177,14 +191,40 @@ class DatabaseController implements RainfallSchema, CollectData
 
     public function showDistricts(): array
     {
+        $result = $this->selectDistricts();
+        $baseDistricts = self::BASE_DISTRICTS;
+        usort($result, function ($districtA, $districtB) use ($baseDistricts) {
+            return array_search($districtA, $baseDistricts) > array_search($districtB, $baseDistricts);
+        });
+        return $result;
     }
 
     public function sumByYear($district = null): array
     {
+        $sql = "SELECT Dist.id, Dist.name, year, SUM(rainfall) as total_annual_rainfall
+                FROM rainfalls  
+                INNER JOIN districts Dist 
+                ON districts_id = Dist.id
+                WHERE districts_id = :districts_id 
+                GROUP BY Dist.id, Dist.name, year
+                ORDER BY Dist.id ASC";
+        $statement = $this->confirmDistrict($district, $sql);
+        $statement->execute();
+        return $statement->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function sumByMonth($district = null): array
     {
+        $sql = "SELECT Dist.id, Dist.name, month, SUM(rainfall) as total_monthly_rainfall
+                FROM  rainfalls
+                INNER JOIN districts Dist 
+                ON Dist.id = districts_id
+                WHERE districts_id = :districts_id 
+                GROUP BY Dist.id, Dist.name, month
+                ORDER BY Dist.id ASC";
+        $statement = $this->confirmDistrict($district, $sql);
+        $statement->execute();
+        return $statement->fetchAll(PDO::FETCH_ASSOC);
     }
 
 }
