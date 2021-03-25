@@ -40,7 +40,8 @@ class DatabaseController implements RainfallSchema, CollectData
         try {
             $query = "CREATE TABLE IF NOT EXISTS districts (
             id int NOT NULL AUTO_INCREMENT,
-            districtsName varchar(25) NOT NULL)";
+            districtsName varchar(25) NOT NULL
+            PRIMARY KEY (id))";
             $statement = $this->pdo->prepare($query);
             $statement->execute();
 
