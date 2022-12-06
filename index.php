@@ -8,7 +8,10 @@ use Dotenv\Dotenv;
 //預設使用 dotenv
 $dotenv = Dotenv::createImmutable(__DIR__);
 $dotenv->load();
-
+//$test = $_ENV['DB_DATABASE'];
+//echo "HAHAHA".PHP_EOL;
+//echo $test;
+//echo "HAHAHA";
 $pdo = DB::init()->pdo();
 
 $databaseController = new DatabaseController($pdo);
