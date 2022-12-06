@@ -33,16 +33,24 @@ class DatabaseController implements RainfallSchema, CollectData
     }
 
     public function createRainfallsTable(){
-        $this->db->schema()->create('users',function (CreateTable $table){
-            $table->boolean('is a man');
-            $table->integer('age');
-            $table->timestamp('created_at');
+        $this->db->schema()->create('rainfallsTable',function (CreateTable $table){
+            $table->integer('rainID')->primary()->autoincrement();
+           $table->integer('rainfallsData');
+           $table->dateTime('time');
+           $table->time('create_at');
+           //$table->foreign('rainID')->references('districtsTable', 'districtID');
         });
-        echo "Create Rainfallstable Successfully!".PHP_EOL;
+        echo "Create Rainfalls table Successfully!".PHP_EOL;
     }
 
     public function createDistrictsTable(){
-
+        $this->db->schema()->create('districtsTable',function (CreateTable $table){
+            $table->integer('districtID')->primary();
+           $table->string('districtName');
+            $table->time('create_at');
+            //$table->foreign('districtID')->references('rainfallsTable','rainID');
+        });
+        echo "Create District table Successfully!".PHP_EOL;
     }
 
     public function importData(){
