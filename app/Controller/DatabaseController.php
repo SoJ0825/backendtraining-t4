@@ -55,6 +55,9 @@ class DatabaseController implements RainfallSchema, CollectData
     private $connection;
     private $db;
     private $schema;
+    private $ordered_array;
+    private $firstYear = 2013;
+    private $lastYear = 2018;
     public function __construct($pdo){
         //TODO: Establish connection from pdo
         $this->connection = Connection::fromPDO($pdo);
@@ -67,14 +70,20 @@ class DatabaseController implements RainfallSchema, CollectData
         $this->createDistrictsTable();
         $this->createRainfallsTable();
     }
+//    public function sortDistrict(){
+//
+//    }
 
     public function createRainfallsTable(){
         $this->db->schema()->create('rainfallsTable',function (CreateTable $table){
             $table->integer('rainID')->primary()->autoincrement();
-           $table->integer('rainfallsData');
+           $table->float('rainfallsData');
            $table->dateTime('time');
-           $table->time('create_at');
-           //$table->foreign('rainID')->references('districtsTable', 'districtID');
+           //$table->time('time');
+           //$table->time('create_at');
+            $table->integer('districtID');
+           $table->foreign('districtID')->references('districtsTable', 'districtID');
+           $table->string('fileName');
         });
         echo "Create Rainfalls table Successfully!".PHP_EOL;
     }
@@ -93,9 +102,9 @@ class DatabaseController implements RainfallSchema, CollectData
         echo PHP_EOL;
         echo "Starting import...";
         echo PHP_EOL;
-        echo "正在尋找檔案....".PHP_EOL;
+        //echo "正在尋找檔案....".PHP_EOL;
         $search_result = scandir('rainfallData');
-        sleep(1);
+        //sleep(1);
         //print_r($search_result);
         //$order = self::BASE_DISTRICTS;
         //$ordered = array();
@@ -137,17 +146,40 @@ class DatabaseController implements RainfallSchema, CollectData
         });
 
         //print_r($search_result);
+        $this->ordered_array = $search_result;
         $order = self::BASE_DISTRICTS;
-        for($i = 0;$i<23;$i++){
-//            $content = json_decode(file_get_contents("rainfallData/$search_result[$i]"), true);
-//            foreach ($content as $item){
-//
-//            }
-
+        for($i=0;$i<23;$i++){
+            //echo "i = $i".PHP_EOL;
+            echo "Start to insert $order[$i] data...".PHP_EOL;
+            $j = $i+2;
+            $content = json_decode(file_get_contents("rainfallData/$search_result[$j]"));
+            //echo "search: $search_result[$j]".PHP_EOL;
+            /*
+             *  $table->integer('rainID')->primary()->autoincrement();
+           $table->integer('rainfallsData');
+           $table->dateTime('time');
+           //$table->time('create_at');
+           $table->foreign('rainID')->references('districtsTable', 'districtID');
+             */
+            //$kk = $i+1;
+            //echo "kk: $kk".PHP_EOL;
             $result = $this->db->insert(array(
                 'districtName' => "$order[$i]",
             ))->into('districtsTable');
-            echo "Inserted: $result".PHP_EOL;
+            $k = $i+1;
+            foreach ($content as $ti=>$data){
+                $result = $this->db->insert(array(
+                    'time'=>"$ti",
+                    'rainfallsData'=>"$data",
+                    'districtID'=>"$k",
+                    'fileName'=>"$search_result[$j]"
+                ))->into('rainfallsTable');
+                //echo "result: $result".PHP_EOL;
+            }
+            //print_r($content);
+
+
+            //echo "Inserted: $result".PHP_EOL;
         }
 //        $test = fopen("rainfallData/$search_result[2]","r") or die("Errorrrrrr");
 //        $jsonobj =fread($test,filesize("rainfallData/$search_result[2]"));
@@ -156,10 +188,40 @@ class DatabaseController implements RainfallSchema, CollectData
     }
 
     public function showDistricts(): array{
-
+        if(!$this->ordered_array){
+            $search_result = scandir('rainfallData');
+            usort($search_result,function ($left, $right){
+                $order = self::BASE_DISTRICTS;
+                $leftPos = -1;
+                $rightPos = -1;
+                for($i=0;$i<23;$i++){
+                    //echo "The order[$i] is $order[$i]".PHP_EOL;
+                    $fLeft =LCSubStr($left, $order[$i],strlen($left),strlen($order[$i]));
+                    $fRight =LCSubStr($right, $order[$i],strlen($right),strlen($order[$i]));
+                    if($fLeft==6){
+                        $leftPos = $i;
+                    }
+                    if($fRight==6){
+                        $rightPos = $i;
+                    }
+                }
+                return $leftPos>=$rightPos;
+            });
+            $this->ordered_array=$search_result;
+        }
+        return $this->ordered_array;
     }
 
     public function sumByYear($district = null): array{
+        if(!$district){
+            for($curYear=$this->firstYear;$curYear<=$this->lastYear;$curYear++){
+                $count = $this->db->from('rainfallsTable')->where('time')->between("$curYear-01-01 00:00:00","$curYear-12-31 23:59:59");
+                $count = $count->sum('rainfallsData');
+                echo "Year: $curYear".PHP_EOL;
+                echo "$count".PHP_EOL;
+            }
+        }
+
 
     }
 
