@@ -211,7 +211,115 @@ class DatabaseController implements RainfallSchema, CollectData
         }
         return $this->ordered_array;
     }
+    public function sumByYear($district = null): array{
+      $result = array();
+        if(!$district){
+            echo "顯示全部地區的年降雨量...".PHP_EOL;
+            sleep(1);
+            for($disID = 1; $disID<=23;$disID++){
+                for($curYear = $this->firstYear;$curYear<=$this->lastYear;$curYear++){
+                    $count = $this->db->from('districtsTable')->leftJoin('rainfallsTable', function ($join){
+                        $join->on('districtsTable.districtID', 'rainfallsTable.districtID');
+                    })->where('districtsTable.districtID')->is($disID)->andWhere('time')->between("$curYear-01-01 00:00:00","$curYear-12-31 23:59:59");
+                    //where('time')->between("$curYear-01-01 00:00:00","$curYear-12-31 23:59:59");
+                    //$count = $count->where('districtID')->is($disID);
+                    $count = $count->sum('rainfallsData');
+                    //echo "count".PHP_EOL;
+                    //print_r($count);
+                    $order = Self::BASE_DISTRICTS;
+                    $idInOrder = $disID-1;
+                   $result[$order[$idInOrder]][$curYear] = $count;
+                }
+            }
+            return $result;
+        }
+        $district = (int)array_search($district, $this->ordered_array);
+        echo "district $district".PHP_EOL;
+        if($district>=2 && $district<=24){
+            $correctDistrict = $district-2;
+            $order = Self::BASE_DISTRICTS;
+            echo "顯示$order[$correctDistrict]的年降雨量".PHP_EOL;
+            sleep(1);
+            $correctDistrict+=1;
+            for($curYear = $this->firstYear;$curYear<=$this->lastYear;$curYear++){
+                $count = $this->db->from('districtsTable')->leftJoin('rainfallsTable', function ($join){
+                    $join->on('districtsTable.districtID', 'rainfallsTable.districtID');
+                })->where('districtsTable.districtID')->is($correctDistrict)->andWhere('time')->between("$curYear-01-01 00:00:00","$curYear-12-31 23:59:59");
+                //where('time')->between("$curYear-01-01 00:00:00","$curYear-12-31 23:59:59");
+                //$count = $count->where('districtID')->is($disID);
+                $count = $count->sum('rainfallsData');
+                //echo "count".PHP_EOL;
+                //print_r($count);
+                //$order = Self::BASE_DISTRICTS;
+                //$idInOrder = $disID-1;
+                $result[$curYear] = $count;
+            }
 
+
+        }else{
+            echo "你不要耍北爛啦，送你一個空 array！^ω^".PHP_EOL;
+            sleep(1);
+        }
+      return $result;
+    }
+
+    public function sumByMonth($district = null): array{
+        $result = array();
+        if(!$district){
+            echo "顯示全部地區的月降雨量...".PHP_EOL;
+            sleep(1);
+            for($disID = 1; $disID<=23;$disID++){
+                for($curYear = $this->firstYear;$curYear<=$this->lastYear;$curYear++){
+                    for($curMonth = 1; $curMonth<=12; $curMonth++) {
+                        $count = $this->db->from('districtsTable')->leftJoin('rainfallsTable', function ($join) {
+                            $join->on('districtsTable.districtID', 'rainfallsTable.districtID');
+                        })->where('districtsTable.districtID')->is($disID)->andWhere('time')->between("$curYear-$curMonth-01 00:00:00", "$curYear-$curMonth-31 23:59:59");
+                        //where('time')->between("$curYear-01-01 00:00:00","$curYear-12-31 23:59:59");
+                        //$count = $count->where('districtID')->is($disID);
+                        $count = $count->sum('rainfallsData');
+                        //echo "count".PHP_EOL;
+                        //print_r($count);
+                        $order = Self::BASE_DISTRICTS;
+                        $idInOrder = $disID - 1;
+                        $result[$order[$idInOrder]][$curYear][$curMonth] = $count;
+                    }
+                }
+            }
+            return $result;
+        }
+        $district = (int)array_search($district, $this->ordered_array);
+        echo "district $district".PHP_EOL;
+        if($district>=2 && $district<=24){
+            $correctDistrict = $district-2;
+            $order = Self::BASE_DISTRICTS;
+            echo "顯示$order[$correctDistrict]的月降雨量".PHP_EOL;
+            sleep(1);
+            $correctDistrict+=1;
+            for($curYear = $this->firstYear;$curYear<=$this->lastYear;$curYear++){
+                for($curMonth=1;$curMonth<=12;$curMonth++){
+                    $count = $this->db->from('districtsTable')->leftJoin('rainfallsTable', function ($join){
+                        $join->on('districtsTable.districtID', 'rainfallsTable.districtID');
+                    })->where('districtsTable.districtID')->is($correctDistrict)->andWhere('time')->between("$curYear-$curMonth-01 00:00:00","$curYear-$curMonth-31 23:59:59");
+                    //where('time')->between("$curYear-01-01 00:00:00","$curYear-12-31 23:59:59");
+                    //$count = $count->where('districtID')->is($disID);
+                    $count = $count->sum('rainfallsData');
+                    //echo "count".PHP_EOL;
+                    //print_r($count);
+                    //$order = Self::BASE_DISTRICTS;
+                    //$idInOrder = $disID-1;
+                    $result[$curYear][$curMonth] = $count;
+                }
+
+            }
+
+
+        }else{
+            echo "你不要耍北爛啦，送你一個空 array！^ω^".PHP_EOL;
+            sleep(1);
+        }
+        return $result;
+    }
+    /*
     public function sumByYear($district = null): array{
         $result = array();
         //echo "您輸入的是：$district".PHP_EOL;
@@ -291,7 +399,7 @@ class DatabaseController implements RainfallSchema, CollectData
         }
         return $result;
     }
-
+*/
 
 
 
