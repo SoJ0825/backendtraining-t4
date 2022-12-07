@@ -213,20 +213,83 @@ class DatabaseController implements RainfallSchema, CollectData
     }
 
     public function sumByYear($district = null): array{
+        $result = array();
+        //echo "您輸入的是：$district".PHP_EOL;
+       // $district = (int)array_search($district, $this->ordered_array);
+        //echo "您輸入的是：$district".PHP_EOL;
         if(!$district){
             for($curYear=$this->firstYear;$curYear<=$this->lastYear;$curYear++){
                 $count = $this->db->from('rainfallsTable')->where('time')->between("$curYear-01-01 00:00:00","$curYear-12-31 23:59:59");
                 $count = $count->sum('rainfallsData');
-                echo "Year: $curYear".PHP_EOL;
-                echo "$count".PHP_EOL;
+               $result[$curYear] = $count;
+                //echo "Year: $curYear".PHP_EOL;
+                //echo "$count".PHP_EOL;
             }
         }
+        elseif((int)array_search($district, $this->ordered_array)==0 || (int)array_search($district, $this->ordered_array)==1){
+            echo "你不要耍北爛啦，送你一個空 array！^ω^".PHP_EOL;
 
+        }else{
+            $district = (int)array_search($district, $this->ordered_array);
+            $order = Self::BASE_DISTRICTS;
+            $corDistrict = $district-2;
+            echo "目前顯示的地區是：$order[$corDistrict]".PHP_EOL;
+            $corDistrict++;
+            for($curYear=$this->firstYear;$curYear<=$this->lastYear;$curYear++){
+                $count = $this->db->from('rainfallsTable')->where('time')->between("$curYear-01-01 00:00:00","$curYear-12-31 23:59:59");
+                $count = $count->where('districtID')->is($corDistrict);
+                $count = $count->sum('rainfallsData');
+                $result[$curYear] = $count;
+                //echo "Year: $curYear".PHP_EOL;
+                //echo "$count".PHP_EOL;
+            }
+        }
+        return $result;
 
     }
 
     public function sumByMonth($district = null): array{
+        $result = array();
+        //$district = (int)array_search($district, $this->ordered_array);
 
+        if(!$district){
+            for($curYear=$this->firstYear;$curYear<=$this->lastYear;$curYear++){
+//                $count = $this->db->from('rainfallsTable')->where('time')->between("$curYear-01-01 00:00:00","$curYear-12-31 23:59:59");
+//                $count = $count->sum('rainfallsData');
+//                $result[$curYear] = $count;
+                //echo "Year: $curYear".PHP_EOL;
+                //echo "$count".PHP_EOL;
+                for($month=1;$month<=12;$month++){
+                    $count = $this->db->from('rainfallsTable')->where('time')->between("$curYear-$month-01 00:00:00", "$curYear-$month-31 23:59:59");
+                    $count = $count->sum('rainfallsData');
+                    $result[$curYear][$month] = $count;
+                }
+            }
+
+        }
+        elseif((int)array_search($district, $this->ordered_array)==0 || (int)array_search($district, $this->ordered_array)==1){
+            echo "你不要耍北爛啦，送你一個空 array！^ω^".PHP_EOL;
+
+        }
+        else{
+            $district = (int)array_search($district, $this->ordered_array);
+            $order = Self::BASE_DISTRICTS;
+            $corDistrict = $district-2;
+            echo "目前顯示的地區是：$order[$corDistrict]".PHP_EOL;
+            $corDistrict++;
+            for($curYear=$this->firstYear;$curYear<=$this->lastYear;$curYear++){
+                for($month=1;$month<=12;$month++){
+                    $count = $this->db->from('rainfallsTable')->where('time')->between("$curYear-$month-01 00:00:00","$curYear-$month-31 23:59:59");
+                    $count = $count->where('districtID')->is($corDistrict);
+                    $count = $count->sum('rainfallsData');
+                    $result[$curYear][$month] = $count;
+                }
+
+                //echo "Year: $curYear".PHP_EOL;
+                //echo "$count".PHP_EOL;
+            }
+        }
+        return $result;
     }
 
 
