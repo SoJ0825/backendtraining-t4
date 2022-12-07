@@ -3,7 +3,8 @@
     "description": "Loads environment variables from `.env` to `getenv()`, `$_ENV` and `$_SERVER` automagically.",
     "type": "project",
     "require": {
-        "vlucas/phpdotenv": "^v5.5.0"
+        "vlucas/phpdotenv": "^v5.5.0",
+        "opis/database": "^4.2.1"
     },
     "autoload": {
         "psr-4": {
