@@ -57,7 +57,7 @@ class DB extends SingletonDB
 
         $dsn = 'mysql:host=' . $this->host . ';dbname=' . $this->dbname;
         $pdo = new PDO($dsn, $this->dbUser, $this->dbPwd);
-        var_dump($pdo);//測試用
+//        var_dump($pdo);//測試用
         return $pdo;
     }
 }
