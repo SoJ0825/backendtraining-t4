@@ -9,11 +9,6 @@ use Dotenv\Dotenv;
 $dotenv = Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
-////---------先測試一下dotenv可用-------------
-//$host = $_ENV['DB_HOST'];
-//echo $host;
-
-
 $pdo = DB::init()->pdo();
 var_dump("到這裡可行");; //測試用
 
