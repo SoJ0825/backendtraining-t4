@@ -4,20 +4,21 @@ namespace App\Controller;
 
 use App\Core\Database\CollectData;
 use App\Core\Database\RainfallSchema;
+use Opis\Database\Database;
+use Opis\Database\Connection;
 
 class DatabaseController implements RainfallSchema, CollectData
 {
     public function __construct($pdo){
-        echo "function __construct要做什麼？？？"; //記得刪除
-
-
-        $pdo->query('SET NAMES UTF8'); // 設定編碼
-        $pdo->query('SET time_zone = "+8:00"'); // 設定台灣時間
-        $pdo->createRainfallsTable();
+        $connection = Connection::fromPDO($pdo);
+        $db = new Database($connection);
+//        echo "成功？";
+//        $result = $db->from('users')->select()->all();
+//        print_r($result);
     }
 
     public function createRainfallsTable(){
-        $sql = "CREATE DATABASE rainfalls ";
+//        $sql = "CREATE DATABASE rainfalls ";
     }
 
     public function createDistrictsTable(){

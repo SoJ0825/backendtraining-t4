@@ -10,7 +10,6 @@ $dotenv = Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
 $pdo = DB::init()->pdo();
-var_dump("到這裡可行");; //測試用
 
 $databaseController = new DatabaseController($pdo);
 

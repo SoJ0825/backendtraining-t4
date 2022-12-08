@@ -3,8 +3,7 @@
 namespace App\Core\Database;
 use PDO;
 use Dotenv\Dotenv;
-use Opis\Database\Database;
-use Opis\Database\Connection;
+
 
 
 class DB extends SingletonDB
@@ -43,22 +42,22 @@ class DB extends SingletonDB
 //        return $pdo;
 
 
+//        try {
+//            $dsn = 'mysql:host=' . $this->host . ';dbname=' . $this->dbname;
+//            $connection = new Connection($dsn, $this->dbUser, $this->dbPwd);
+////            $connection = Connection::fromPDO($pdo);
+//            $connection->getPDO(); //這邊才是透過PDO連線
+//            $pdo = new Database($connection);//因為PDO是new Database的Object
+//            echo "資料庫連線成功";
+//        } catch (\PDOException $e) {
+//            echo $e->getMessage();
+//        }
+//        return $pdo;
+//        //最後應該要回傳PDO object才可以
 
-        try {
-            $dsn = 'mysql:host=' . $this->host . ';dbname=' . $this->dbname;
-            $connection = new Connection($dsn, $this->dbUser, $this->dbPwd);
-//            $connection = Connection::fromPDO($pdo);
-            $connection->getPDO(); //這邊才是透過PDO連線
-            $pdo = new Database($connection);
-            echo "資料庫連線成功";
-        } catch (\PDOException $e) {
-            echo $e->getMessage();
-        }
-        var_dump($pdo);
+        $dsn = 'mysql:host=' . $this->host . ';dbname=' . $this->dbname;
+        $pdo = new PDO($dsn, $this->dbUser, $this->dbPwd);
+        var_dump($pdo);//測試用
         return $pdo;
-
-//    $conn = new PDO();
-//        //return $conn;
-//        return  false;
     }
 }
