@@ -8,9 +8,9 @@ use Dotenv\Dotenv;
 //預設使用 dotenv
 $dotenv = Dotenv::createImmutable(__DIR__);
 $dotenv->load();
-
+var_dump(1);
 $pdo = DB::init()->pdo();
-
+var_dump(5);
 $databaseController = new DatabaseController($pdo);
 
 do {
