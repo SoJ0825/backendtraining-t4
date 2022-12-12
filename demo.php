@@ -31,19 +31,24 @@
 
   echo "filename: $fileName, basename: $baseName" .PHP_EOL;
   $splice = substr($fileName,'7');
-  echo $splice.PHP_EOL;
+  // echo $splice.PHP_EOL;
 
   $town = [];
   $pathJson = '/var/www/html/weather/backendtraining-t4/rainfallData/*.*';
   foreach(glob($pathJson) as $jsonFileName){
    $fileName = pathinfo($jsonFileName, PATHINFO_FILENAME);   
    $splice = mb_substr($fileName,-2,2, 'UTF-8');
+   if(!str_contains("$splice","區")){
+    $splice = $splice.'區';
+   }
    
    array_push($town, $splice);
-   echo $splice.PHP_EOL;
+  //  echo $splice.PHP_EOL;
 }
-print_r($town);
+echo "篩選 filename 的 town name: "; print_r($town);
 const BASE_DISTRICTS = [
         '南區', '北區', '安平區', '左鎮區', '仁德區', '關廟區', '官田區', '麻豆區', '佳里區', '西港區', '七股區', '將軍區', '學甲區',
         '北門區', '新營區', '後壁區', '白河區', '東山區', '下營區', '柳營區', '鹽水區', '山上區', '安定區',
     ];
+    $result = array_intersect(BASE_DISTRICTS, $town);
+echo "兩陣列之交集 sort: " ;   print_r($result);
