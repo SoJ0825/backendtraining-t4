@@ -2,6 +2,7 @@
 
 namespace App\Core\Database;
 
+use Exception;
 use Opis\Database\Connection;
 use Opis\Database\Database;
 use PDO;
@@ -25,7 +26,11 @@ class DB extends SingletonDB
 
         public function pdo(): PDO{
         // 回傳 PDO 物件 $conn->getPDO()
-        return $this->conn->getPDO();
+        try{    
+          return $this->conn->getPDO();
+        }catch(Exception $e){
+            echo $e->getMessage();
+        }
     }
 
     public function database(){
