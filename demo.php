@@ -33,9 +33,17 @@
   $splice = substr($fileName,'7');
   echo $splice.PHP_EOL;
 
+  $town = [];
   $pathJson = '/var/www/html/weather/backendtraining-t4/rainfallData/*.*';
   foreach(glob($pathJson) as $jsonFileName){
    $fileName = pathinfo($jsonFileName, PATHINFO_FILENAME);   
-   $splice = substr($fileName,'7');
+   $splice = mb_substr($fileName,-2,2, 'UTF-8');
+   
+   array_push($town, $splice);
    echo $splice.PHP_EOL;
 }
+print_r($town);
+const BASE_DISTRICTS = [
+        '南區', '北區', '安平區', '左鎮區', '仁德區', '關廟區', '官田區', '麻豆區', '佳里區', '西港區', '七股區', '將軍區', '學甲區',
+        '北門區', '新營區', '後壁區', '白河區', '東山區', '下營區', '柳營區', '鹽水區', '山上區', '安定區',
+    ];
