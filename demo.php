@@ -2,6 +2,7 @@
   require './vendor/autoload.php';
   use Opis\Database\Connection;
   use Opis\Database\Database;
+  use Opis\Database\Schema\CreateTable;
 
   $dotenv =  Dotenv\Dotenv::createImmutable(__DIR__); 
   $dotenv->load();
@@ -20,16 +21,28 @@
   }
 
   $db = new Database($connection);
+  // $db->from('users')->delete();
+
+  $db->schema()->drop('users');
+  $db->schema()->create('users', function(CreateTable $table){
+    $table->integer('id');
+    $table->integer('id')->primary();
+    $table->integer('id')->autoincrement();
+    $table->string('town');
+});
   // $result = $db->from('users')
-            //  ->select()
-            //  ->all();
-  // print_r($result);
+  //            ->select()
+  //            ->all();
+  
+  $columns = $db->schema()->getColumns('users', true);
+  echo "users col 內容： "; print_r($columns);
+
 
   $path = '/var/www/html/weather/backendtraining-t4/rainfallData/C0X270_柳營.json';
   $fileName = pathinfo($path, PATHINFO_FILENAME);
   $baseName = pathinfo($path, PATHINFO_BASENAME);
 
-  echo "filename: $fileName, basename: $baseName" .PHP_EOL;
+  // echo "filename: $fileName, basename: $baseName" .PHP_EOL;
   $splice = substr($fileName,'7');
   // echo $splice.PHP_EOL;
 
@@ -45,10 +58,10 @@
    array_push($town, $splice);
   //  echo $splice.PHP_EOL;
 }
-echo "篩選 filename 的 town name: "; print_r($town);
+// echo "篩選 filename 的 town name: "; print_r($town);
 const BASE_DISTRICTS = [
         '南區', '北區', '安平區', '左鎮區', '仁德區', '關廟區', '官田區', '麻豆區', '佳里區', '西港區', '七股區', '將軍區', '學甲區',
         '北門區', '新營區', '後壁區', '白河區', '東山區', '下營區', '柳營區', '鹽水區', '山上區', '安定區',
     ];
     $result = array_intersect(BASE_DISTRICTS, $town);
-echo "兩陣列之交集 sort: " ;   print_r($result);
+// echo "兩陣列之交集 sort: " ;   print_r($result);
