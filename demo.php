@@ -25,7 +25,6 @@
 
   $db->schema()->drop('users');
   $db->schema()->create('users', function(CreateTable $table){
-    $table->integer('id');
     $table->integer('id')->primary();
     $table->integer('id')->autoincrement();
     $table->string('town');
