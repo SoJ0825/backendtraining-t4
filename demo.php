@@ -28,11 +28,53 @@
     $table->integer('id')->primary();
     $table->integer('id')->autoincrement();
     $table->string('town');
-});
-  // $result = $db->from('users')
-  //            ->select()
-  //            ->all();
+  });
   
+  // add columns
+  $db->schema()->alter('users', function($table){
+    $table->integer('age');
+    $table->string('gender',8);
+  });
+
+  // delete columns
+  $db->schema()->alter('users', function($table){
+    $table->dropColumn('town');
+  });
+
+  // 判斷當前 database 內，有/無 tables: users 
+   $tables = 'users';
+   $msg = ($db->schema()->hasTable($tables)) ? "Database have table: $tables!": "Database have no $tables table!";
+   echo $msg.PHP_EOL;
+
+  // Insert into data to users table
+  $db->insert(array(
+    'age' => 18,
+    'gender' => 'male'
+  ))->into('users');
+
+  $db->insert(array(
+    'age' => 32,
+    'gender' => 'female'
+  ))->into('users');
+
+  $db->insert(array(
+    'age' => 22,
+    'gender' => 'Queer'
+  ))->into('users');
+  
+  
+  $result = $db->from('users')
+             ->select()
+             ->all();
+  echo "users row data: "; print_r($result);
+
+  // 留下 table: users, 將其當前的 row data 全部刪除
+  $db->schema()->truncate('users');
+  $result = $db->from('users')
+             ->select()
+             ->all();
+  echo "delete users row data: "; print_r($result);
+
   $columns = $db->schema()->getColumns('users', true);
   echo "users col 內容： "; print_r($columns);
 
