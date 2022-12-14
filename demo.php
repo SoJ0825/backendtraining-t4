@@ -21,84 +21,51 @@
   }
 
   $db = new Database($connection);
-  // $db->from('users')->delete();
-
-  $db->schema()->drop('users');
-  $db->schema()->create('users', function(CreateTable $table){
+  $tables = 'districts';
+  $db->schema()->drop($tables);
+  $db->schema()->create($tables, function(CreateTable $table){
     $table->integer('id')->primary();
     $table->integer('id')->autoincrement();
-    $table->string('town');
+    $table->string('name', 8);
   });
-  
-  // add columns
-  $db->schema()->alter('users', function($table){
-    $table->integer('age');
-    $table->string('gender',8);
-  });
-
-  // delete columns
-  $db->schema()->alter('users', function($table){
-    $table->dropColumn('town');
-  });
-
-  // 判斷當前 database 內，有/無 tables: users 
-   $tables = 'users';
+  // 判斷當前 database 內，有/無 tables  
    $msg = ($db->schema()->hasTable($tables)) ? "Database have table: $tables!": "Database have no $tables table!";
    echo $msg.PHP_EOL;
-
-  // Insert into data to users table
-  $db->insert(array(
-    'age' => 18,
-    'gender' => 'male'
-  ))->into('users');
-
-  $db->insert(array(
-    'age' => 32,
-    'gender' => 'female'
-  ))->into('users');
-
-  $db->insert(array(
-    'age' => 22,
-    'gender' => 'Queer'
-  ))->into('users');
   
-  
-  $result = $db->from('users')
-             ->select()
-             ->all();
-  echo "users row data: "; print_r($result);
-
-  // 留下 table: users, 將其當前的 row data 全部刪除
-  $db->schema()->truncate('users');
-  $result = $db->from('users')
-             ->select()
-             ->all();
-  echo "delete users row data: "; print_r($result);
-
-  $columns = $db->schema()->getColumns('users', true);
-  echo "users col 內容： "; print_r($columns);
-
-
-  $path = '/var/www/html/weather/backendtraining-t4/rainfallData/C0X270_柳營.json';
-  $fileName = pathinfo($path, PATHINFO_FILENAME);
-  $baseName = pathinfo($path, PATHINFO_BASENAME);
-
-  // echo "filename: $fileName, basename: $baseName" .PHP_EOL;
-  $splice = substr($fileName,'7');
-  // echo $splice.PHP_EOL;
-
+  // districts 資訊 
   $town = [];
   $pathJson = '/var/www/html/weather/backendtraining-t4/rainfallData/*.*';
   foreach(glob($pathJson) as $jsonFileName){
-   $fileName = pathinfo($jsonFileName, PATHINFO_FILENAME);   
-   $splice = mb_substr($fileName,-2,2, 'UTF-8');
-   if(!str_contains("$splice","區")){
-    $splice = $splice.'區';
-   }
-   
-   array_push($town, $splice);
-  //  echo $splice.PHP_EOL;
-}
+    $fileName = pathinfo($jsonFileName, PATHINFO_FILENAME);   
+    $splice = mb_substr($fileName,-2,2, 'UTF-8');
+
+    if(!str_contains("$splice","區")){
+      $splice = $splice.'區';
+    }
+
+  // Insert into data to users table
+    $db->insert(array(
+    'name' => $splice
+    ))->into($tables);
+    // array_push($town, $splice);
+  }
+  
+  $result = $db->from($tables)
+             ->select()
+             ->all();
+  echo "$tables row data: "; print_r($result);
+
+  // 留下 table: users, 將其當前的 row data 全部刪除
+  // $db->schema()->truncate('users');
+  // $result = $db->from('users')
+  //            ->select()
+  //            ->all();
+  // echo "delete users row data: "; print_r($result);
+
+  // $columns = $db->schema()->getColumns('users', true);
+  // echo "users col 內容： "; print_r($columns);
+
+  
 // echo "篩選 filename 的 town name: "; print_r($town);
 const BASE_DISTRICTS = [
         '南區', '北區', '安平區', '左鎮區', '仁德區', '關廟區', '官田區', '麻豆區', '佳里區', '西港區', '七股區', '將軍區', '學甲區',
