@@ -101,5 +101,25 @@ function transpose($rainfallData) {
 $rainfallData = transpose($rainfallData);
 echo "rainfallData 整理後： "; print_r($rainfallData);
 
-echo "rainfallData 整理後： "; print_r(transpose($rainfallData));
-// echo transpose($rainfallData)[1][0].PHP_EOL;
+// [hard code] Get Array value 
+$district = pathinfo($pathJsonFile, PATHINFO_FILENAME); 
+$district = mb_substr($district,-4,4, 'UTF-8');
+$date = $rainfallData[0][0];
+$rainfall = $rainfallData[0][1];
+
+// Create tables2 = rainfalldata
+$tables = 'rainfall';
+$db->schema()->drop($tables);
+$db->schema()->create($tables, function(CreateTable $table){
+  $table->integer('id')->primary()->autoincrement();
+  $table->string('name', 8);
+  $table->dateTime('datetime');
+  $table->float('rainfall');
+});
+
+// Insert JSON to MySQL Database with PHP Code
+$db->insert(array(
+  'name' => $district,
+  'datetime' => $date,
+  'rainfall' => $rainfall
+  ))->into($tables);
