@@ -79,4 +79,27 @@ const BASE_DISTRICTS = [
 $pathJsonFile = '/var/www/html/weather/backendtraining-t4/rainfallData/C0X666_word.json';
 $jsondata = file_get_contents($pathJsonFile);
 var_dump($jsondata); // string
-// 加工 string json data
+echo '---------------------------' .PHP_EOL;
+
+// Convert JSON String into PHP Array
+$rainfallData = json_decode($jsondata, true) ; 
+echo "rainfallData 未整理： "; print_r($rainfallData);
+
+// 加工 array json data
+function transpose($rainfallData) {
+  $result = [];
+  $i = 0;
+  foreach ($rainfallData as $key => $item) {
+    $key = strtotime($key);
+    $key = date("Y-m-d H:i:s", $key);
+    $result[$i][0] = $key;
+    $result[$i][1] = $item;
+    $i++;
+  }
+  return $result;
+}
+$rainfallData = transpose($rainfallData);
+echo "rainfallData 整理後： "; print_r($rainfallData);
+
+echo "rainfallData 整理後： "; print_r(transpose($rainfallData));
+// echo transpose($rainfallData)[1][0].PHP_EOL;
