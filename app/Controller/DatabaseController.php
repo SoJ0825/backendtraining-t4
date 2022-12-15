@@ -32,8 +32,8 @@ class DatabaseController implements CollectData, RainfallSchema
             $j=count($arr);  
             // print($j);
             for($i=0;$i<$j;$i++){
-                $jsondata = file_get_contents("$arr[$i]");
-                $data = json_decode($jsondata, true);
+                // $jsondata = file_get_contents("$arr[$i]");
+                // $data = json_decode($jsondata, true);
                 $str=substr("$arr[$i]",-11, -5);
                 $str1="區";
                 //echo "目前在if上面：".$str.PHP_EOL;  
@@ -59,7 +59,25 @@ class DatabaseController implements CollectData, RainfallSchema
             
     public function sumByYear($district = null): array
     {
-
+        $result = $this->db->from('districts')   
+             ->Join('rainfalls', function($join){
+               $join->on('rainfalls.districts', 'districts.district');
+             })
+            ->where('YEAR')->between(2015,2018)
+            ->groupBy('districts.dis_id','rainfalls.YEAR')
+            //  ->having('rainfalls.rain', function($column){
+            //    $column->sum();
+            //  })
+            ->select(function($include){
+                $include->count('districts.district', '資料筆數')
+                        ->sum('rainfalls.rain', 'total_rainfalls')
+                        ->column('rainfalls.YEAR')
+                        ->column('rainfalls.districts', 'name');
+              })
+            //  ->select()
+             ->all();
+              
+        return $result;
     }
 
     public function sumByMonth($district = null): array
@@ -73,7 +91,9 @@ class DatabaseController implements CollectData, RainfallSchema
     {
             $this->db->schema()->create('rainfalls', function(CreateTable $table){
             $table->integer('id')->autoincrement();
-            $table->string('districts', 128)->index();
+            $table->string('districts', 64)->index();
+            $table->integer('YEAR',4);
+            $table->integer('MONTH',2);
             $table->dateTime('datetime' , 20);
             $table->float('rain', 5);
             });
@@ -82,8 +102,8 @@ class DatabaseController implements CollectData, RainfallSchema
     public function createDistrictsTable()
     {
             $this->db->schema()->create('districts', function(CreateTable $table){
-            $table->integer('id')->autoincrement();
-            $table->string('districts', 64)->index();
+            $table->integer('dis_id')->autoincrement();
+            $table->string('district', 64)->index();
             });
     }
 
@@ -98,7 +118,7 @@ class DatabaseController implements CollectData, RainfallSchema
             $j=count($districtarr);
             for($i=0;$i<$j;$i++){
             $this->db->insert(array(
-                 'districts' => "$districtarr[$i]"
+                 'district' => "$districtarr[$i]"
             ))
             ->into('districts');
             }
@@ -117,16 +137,22 @@ class DatabaseController implements CollectData, RainfallSchema
             for($i=0;$i<$j;$i++){
             $jsondata = file_get_contents("$arr[$i]");
             $data = json_decode($jsondata, true);
+            //取出地區字串
             $str=substr("$arr[$i]",-11, -5);
             $str1="區";
+            //判斷特定字串並塞入字串
             if (!str_contains($str, $str1)) { 
                 $str=$str.$str1;}
                 else{
                     $str=$str;
                 }         
             foreach($data as $key=>$rain){
+                $str2=substr($key,0, 4);
+                $str3=substr($key,5,2);
             $result=$this->db->insert(array(
                 'districts' => $str,
+                'YEAR' => $str2,
+                'MONTH' => $str3,
                 'datetime' => $key,
                 'rain' => $rain
            ))

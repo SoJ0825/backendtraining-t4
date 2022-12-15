@@ -43,17 +43,24 @@ $str0=[];
 for($i=0;$i<$j;$i++){
 $jsondata = file_get_contents("$arr[$i]");
 $data = json_decode($jsondata, true);
-$str=substr("$arr[$i]",-11, -5);
-$str1="區";
-if (!str_contains($str, $str1)) { 
-   $str=$str.$str1;}
-   else{
-       $str=$str;
-   }    
-     $str0=  $str; 
-foreach($str0 as $key=>$value){
-    echo $key.$value;
-}
+// print_r($data);
+foreach($data as $key=>$value){
+    // print_r($key.PHP_EOL);
+
+// var_dump(111);
+$str2=substr($key,0, 4);
+$str3=substr($key,5,2);
+print($str2.PHP_EOL);}
+// $str1="區";
+// if (!str_contains($str, $str1)) { 
+//    $str=$str.$str1;}
+//    else{
+//        $str=$str;
+//    }    
+//      $str0=  $str; 
+// foreach($str0 as $key=>$value){
+//     echo $key.$value;
+// }
 // foreach($data as $key=>$rain){
 // $result=$this->db->insert(array(
 //    'districts' => $str,
@@ -66,7 +73,12 @@ foreach($str0 as $key=>$value){
 // <?php
 // $a1=array("a"=>"red","b"=>"green","c"=>"blue","d"=>"yellow");
 // $a2=array("e"=>"red","f"=>"green","g"=>"blue");
-
 // $result=array_intersect($a1,$a2);
 // print_r($result);
+
+// SELECT customers.Name, orders.Order_No
+// FROM customers
+// INNER JOIN orders
+// ON customers.C_Id=orders.C_Id;
+
 }
