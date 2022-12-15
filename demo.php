@@ -53,7 +53,7 @@
   $result = $db->from($tables)
              ->select()
              ->all();
-  echo "$tables row data: "; print_r($result);
+  // echo "$tables row data: "; print_r($result);
 
   // 留下 table: users, 將其當前的 row data 全部刪除
   // $db->schema()->truncate('users');
@@ -73,3 +73,10 @@ const BASE_DISTRICTS = [
     ];
     $result = array_intersect(BASE_DISTRICTS, $town);
 // echo "兩陣列之交集 sort: " ;   print_r($result);
+
+// Json data to mysql:
+// Read the json file in php
+$pathJsonFile = '/var/www/html/weather/backendtraining-t4/rainfallData/C0X666_word.json';
+$jsondata = file_get_contents($pathJsonFile);
+var_dump($jsondata); // string
+// 加工 string json data
