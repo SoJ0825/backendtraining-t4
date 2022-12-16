@@ -76,36 +76,9 @@ const BASE_DISTRICTS = [
 
 // Json data to mysql:
 // Read the json file in php
-$pathJsonFile = '/var/www/html/weather/backendtraining-t4/rainfallData/C0X666_word.json';
-$jsondata = file_get_contents($pathJsonFile);
-var_dump($jsondata); // string
-echo '---------------------------' .PHP_EOL;
-
 // Convert JSON String into PHP Array
-$rainfallData = json_decode($jsondata, true) ; 
-echo "rainfallData 未整理： "; print_r($rainfallData);
-
 // 加工 array json data
-function transpose($rainfallData) {
-  $result = [];
-  $i = 0;
-  foreach ($rainfallData as $key => $item) {
-    $key = strtotime($key);
-    $key = date("Y-m-d H:i:s", $key);
-    $result[$i][0] = $key;
-    $result[$i][1] = $item;
-    $i++;
-  }
-  return $result;
-}
-$rainfallData = transpose($rainfallData);
-echo "rainfallData 整理後： "; print_r($rainfallData);
-
-// [hard code] Get Array value 
-$district = pathinfo($pathJsonFile, PATHINFO_FILENAME); 
-$district = mb_substr($district,-4,4, 'UTF-8');
-$date = $rainfallData[0][0];
-$rainfall = $rainfallData[0][1];
+// Insert JSON to MySQL Database with PHP Code
 
 // Create tables2 = rainfalldata
 $tables = 'rainfall';
@@ -117,9 +90,21 @@ $db->schema()->create($tables, function(CreateTable $table){
   $table->float('rainfall');
 });
 
-// Insert JSON to MySQL Database with PHP Code
-$db->insert(array(
-  'name' => $district,
-  'datetime' => $date,
-  'rainfall' => $rainfall
-  ))->into($tables);
+
+// $pathJsonRowData = '/var/www/html/weather/backendtraining-t4/rainfallData/';
+$pathJsonRowData = '/var/www/html/weather/backendtraining-t4/whatever';
+// many jsonfile push into $rainfallData array
+$rainfallData = [];
+foreach (new DirectoryIterator($pathJsonRowData) as $file) {
+  if ($file->getExtension() === 'json') {
+    $data = json_decode(file_get_contents($file->getPathname()), true);
+    $fileName = pathinfo($file->getFilename(), PATHINFO_FILENAME);   
+    $splice = mb_substr($fileName,-5,5, 'UTF-8');
+    $rainfallData[$splice] = $data;
+  }
+}
+print_r($rainfallData);
+print_r($rainfallData[0]);
+$count1 = count($rainfallData);
+$count2 = count($rainfallData[0]);
+echo "rainfallData 內含地區： $count1 ， 地區0: $count2".PHP_EOL;
