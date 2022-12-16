@@ -103,11 +103,11 @@ foreach (new DirectoryIterator($pathJsonRowData) as $file) {
     $rainfallData[$splice] = $data;
   }
 }
-print_r($rainfallData);
-print_r($rainfallData['apple']);
-$count1 = count($rainfallData);
-$count2 = count($rainfallData['apple']);
-echo "rainfallData 內含地區： $count1 ， 地區 0 之資料筆數: $count2".PHP_EOL;
+// print_r($rainfallData);
+// print_r($rainfallData['apple']);
+// $count1 = count($rainfallData);
+// $count2 = count($rainfallData['apple']);
+// echo "rainfallData 內含地區： $count1 ， 地區 0 之資料筆數: $count2".PHP_EOL;
 
 // 重構 rainfallData 內容
 function transpose($rainfallData){
@@ -121,11 +121,29 @@ function transpose($rainfallData){
       $result[$i][1] = $key;
       // 地區
       $result[$i][2] = $value;
-    }
+      $i++; 
     $i++; 
+      $i++; 
+    }
+    
   }
   return $result; 
 }
 
 $refactorRainfallData = transpose($rainfallData);
 echo PHP_EOL."重構後的 rainfallData： ";print_r($refactorRainfallData);
+
+// $refactorRainfallData insert into mysql
+function importData($refactorRainfallData, $db, $tables){
+
+  $refactorRainfallDataKey = count($refactorRainfallData);
+  for($i = 0; $i < $refactorRainfallDataKey; $i++ ){
+    $name = $refactorRainfallData[$i][0];
+    $date = $refactorRainfallData[$i][1];
+    $rainfall = $refactorRainfallData[$i][2];
+
+    echo "name: $name, date: $date, rainfall: $rainfall".PHP_EOL;
+  }
+ 
+}  
+importData($refactorRainfallData, $db, $tables);
