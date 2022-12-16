@@ -104,7 +104,28 @@ foreach (new DirectoryIterator($pathJsonRowData) as $file) {
   }
 }
 print_r($rainfallData);
-print_r($rainfallData[0]);
+print_r($rainfallData['apple']);
 $count1 = count($rainfallData);
-$count2 = count($rainfallData[0]);
-echo "rainfallData 內含地區： $count1 ， 地區0: $count2".PHP_EOL;
+$count2 = count($rainfallData['apple']);
+echo "rainfallData 內含地區： $count1 ， 地區 0 之資料筆數: $count2".PHP_EOL;
+
+// 重構 rainfallData 內容
+function transpose($rainfallData){
+  $i = 0;
+  $result = [];
+  foreach($rainfallData as $town => $rowdata){
+    foreach($rowdata as $key => $value){
+      // 地區
+      $result[$i][0] = $town;
+      // 日期
+      $result[$i][1] = $key;
+      // 地區
+      $result[$i][2] = $value;
+    }
+    $i++; 
+  }
+  return $result; 
+}
+
+$refactorRainfallData = transpose($rainfallData);
+echo PHP_EOL."重構後的 rainfallData： ";print_r($refactorRainfallData);
