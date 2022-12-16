@@ -122,8 +122,6 @@ function transpose($rainfallData){
       // 地區
       $result[$i][2] = $value;
       $i++; 
-    $i++; 
-      $i++; 
     }
     
   }
@@ -142,8 +140,19 @@ function importData($refactorRainfallData, $db, $tables){
     $date = $refactorRainfallData[$i][1];
     $rainfall = $refactorRainfallData[$i][2];
 
-    echo "name: $name, date: $date, rainfall: $rainfall".PHP_EOL;
+    // echo "name: $name, date: $date, rainfall: $rainfall".PHP_EOL;
+
+    try{
+      $db->insert(array(
+        'name' => $name,
+        'datetime' => $date,
+        'rainfall' => $rainfall
+        ))->into($tables);
+    }catch(Exception $e){
+      echo $e->getMessage();
+    }
   }
- 
+  echo "Insert RainfallData into MySQL Sucess!";
 }  
 importData($refactorRainfallData, $db, $tables);
+
