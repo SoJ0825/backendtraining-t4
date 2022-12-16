@@ -61,6 +61,12 @@ class DatabaseController implements RainfallSchema, CollectData
     public function importData(){
       $this->createRainfallsTable(); 
       $this->createDistrictsTable();
+
+    //   $tables = $this->schema->getTables(); 
+    $tables = $this->db->schema->getTables();
+      foreach ($tables as $table){
+        echo $table.PHP_EOL;
+      }
      // Check databases have any tables?   
        // Databases have no tables
          // Create rainfallTable and districtTable, then import data
