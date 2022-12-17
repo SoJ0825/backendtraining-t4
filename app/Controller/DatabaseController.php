@@ -35,9 +35,16 @@ class DatabaseController implements RainfallSchema, CollectData
         $this->pdo = $pdo;
         echo PHP_EOL.'var_dump of $this->pdo is ';var_dump($this->pdo);
         
-        $this->db = new Database($this->pdo);
+        // $this->db = new Database($this->pdo);
+        try{
+            $this->db = DB::init()->database();
+        }catch(Exception $e){
+            echo $e->getMessage();
+        }
+        
         // what's in the $this->db?
         echo PHP_EOL.'var_dump of $this->db  is ';var_dump($this->db);
+        $this->schema = $this->db->schema();
     }
 
     public function createRainfallsTable(){
