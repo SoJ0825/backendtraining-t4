@@ -28,23 +28,14 @@ class DatabaseController implements RainfallSchema, CollectData
 // Methods
 // RainfallSchema
     public function __construct($pdo){
-        // 建立連線前置作業
-        echo PHP_EOL.'var_dump of $pdo  is ';var_dump($pdo);
-        echo PHP_EOL.'var_dump of $this->pdo  is ';var_dump($this->pdo);
-        // connection by using the instance of PDO 
-        $this->pdo = $pdo;
-        echo PHP_EOL.'var_dump of $this->pdo is ';var_dump($this->pdo);
-        
-        // $this->db = new Database($this->pdo);
+        // 建立連線作業
         try{
+            $this->pdo = $pdo;
             $this->db = DB::init()->database();
+            $this->schema = $this->db->schema();
         }catch(Exception $e){
             echo $e->getMessage();
         }
-        
-        // what's in the $this->db?
-        echo PHP_EOL.'var_dump of $this->db  is ';var_dump($this->db);
-        $this->schema = $this->db->schema();
     }
 
     public function createRainfallsTable(){
@@ -74,10 +65,11 @@ class DatabaseController implements RainfallSchema, CollectData
       $this->createDistrictsTable();
 
       $tables = $this->schema->getTables(); 
-    // $tables = $this->db->schema->getTables();
-      foreach ($tables as $table){
-        echo $table.PHP_EOL;
+      echo PHP_EOL."Databases table list: ".PHP_EOL;  
+      foreach ($tables as $key => $value){
+        echo $value.PHP_EOL;
       }
+      
      // Check databases have any tables?   
        // Databases have no tables
          // Create rainfallTable and districtTable, then import data
