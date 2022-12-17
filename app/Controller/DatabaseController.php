@@ -31,14 +31,13 @@ class DatabaseController implements RainfallSchema, CollectData
         // 建立連線前置作業
         echo PHP_EOL.'var_dump of $pdo  is ';var_dump($pdo);
         echo PHP_EOL.'var_dump of $this->pdo  is ';var_dump($this->pdo);
-        // connection by using the fromPDO static method 
-        $this->pdo = Connection::fromPDO($pdo);
+        // connection by using the instance of PDO 
+        $this->pdo = $pdo;
+        echo PHP_EOL.'var_dump of $this->pdo is ';var_dump($this->pdo);
         
-        // 建立 $db 物件
         $this->db = new Database($this->pdo);
         // what's in the $this->db?
-        echo PHP_EOL.'$this->db var_dump is ';var_dump($this->db);
-        $this->schema = $this->db->schema();
+        echo PHP_EOL.'var_dump of $this->db  is ';var_dump($this->db);
     }
 
     public function createRainfallsTable(){
