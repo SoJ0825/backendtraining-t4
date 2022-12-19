@@ -27,6 +27,7 @@ class DatabaseController implements RainfallSchema, CollectData
     private $rainfallsTableName = 'rainfall';
     private $districtsTableName = 'districts';
     private $rainfallsPath = '/var/www/html/weather/backendtraining-t4/rainfallData';
+    private $districtsPath ='/var/www/html/weather/backendtraining-t4/rainfallData/*.*';
 // Methods
 // RainfallSchema
     public function __construct($pdo){
@@ -137,6 +138,23 @@ class DatabaseController implements RainfallSchema, CollectData
             echo "Insert RainfallData into MySQL Sucess!";
             }  
             importData($refactorRainfallData, $this->db, $this->rainfallsTableName);
+
+            // import districts data use php
+            foreach(glob($this->districtsPath) as $jsonFileName){
+            $fileName = pathinfo($jsonFileName, PATHINFO_FILENAME);   
+            $splice = mb_substr($fileName,-2,2, 'UTF-8');
+
+            if(!str_contains("$splice","區")){
+            $splice = $splice.'區';
+            }
+
+            // Insert into data to districts table
+            $this->db->insert(array(
+            'name' => $splice
+            ))->into($this->districtsTableName);
+            // array_push($town, $splice);
+            }
+
        }
     }
 // CollectData
