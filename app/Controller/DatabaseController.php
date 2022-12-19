@@ -14,6 +14,7 @@ use PDO;
 use App\Core\Database\DB;
 // 使用 例外處理
 use Exception;
+use DirectoryIterator;
 
 
 class DatabaseController implements RainfallSchema, CollectData
@@ -25,6 +26,7 @@ class DatabaseController implements RainfallSchema, CollectData
 // table name
     private $rainfallsTableName = 'rainfall';
     private $districtsTableName = 'districts';
+    private $rainfallsPath = '/var/www/html/weather/backendtraining-t4/rainfallData';
 // Methods
 // RainfallSchema
     public function __construct($pdo){
@@ -76,7 +78,65 @@ class DatabaseController implements RainfallSchema, CollectData
        } else {
            // Databases have rainfallTable and districtTable
            echo "Databases have tables" . PHP_EOL;
-           // Clear two table's row data,  then import data
+           // Clear two table's row data 
+           $this->schema->truncate($this->rainfallsTableName);
+           $this->schema->truncate($this->districtsTableName);
+           // Then import data
+           // import rainfallTable data use php
+           $rainfallData = [];
+           foreach (new DirectoryIterator($this->rainfallsPath) as $file) {
+              if ($file->getExtension() === 'json') {
+                $data = json_decode(file_get_contents($file->getPathname()), true);
+                $fileName = pathinfo($file->getFilename(), PATHINFO_FILENAME);   
+                $splice = mb_substr($fileName,-2,2, 'UTF-8');
+                if(!str_contains("$splice","區")){
+                    $splice = $splice.'區';
+                  }
+                $rainfallData[$splice] = $data;
+              }
+           }
+           // 重構 rainfallData 內容
+           function transpose($rainfallData){
+                $i = 0;
+                $result = [];
+                foreach($rainfallData as $town => $rowdata){
+                    foreach($rowdata as $key => $value){
+                    // 地區
+                    $result[$i][0] = $town;
+                    // 日期
+                    $result[$i][1] = $key;
+                    // 地區
+                    $result[$i][2] = $value;
+                    $i++; 
+                    }
+                }
+               return $result; 
+            }
+            //$refactorRainfallData insert into mysql
+            $refactorRainfallData = transpose($rainfallData);
+            function importData($refactorRainfallData, $db, $tables){
+
+                $refactorRainfallDataKey = count($refactorRainfallData);
+                for($i = 0; $i < $refactorRainfallDataKey; $i++ ){
+                    $name = $refactorRainfallData[$i][0];
+                    $date = $refactorRainfallData[$i][1];
+                    $rainfall = $refactorRainfallData[$i][2];
+
+                    // echo "name: $name, date: $date, rainfall: $rainfall".PHP_EOL;
+
+                    try{
+                    $db->insert(array(
+                        'name' => $name,
+                        'datetime' => $date,
+                        'rainfall' => $rainfall
+                        ))->into($tables);
+                    }catch(Exception $e){
+                    echo $e->getMessage();
+                    }
+                }
+            echo "Insert RainfallData into MySQL Sucess!";
+            }  
+            importData($refactorRainfallData, $this->db, $this->rainfallsTableName);
        }
     }
 // CollectData
