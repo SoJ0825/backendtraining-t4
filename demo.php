@@ -34,7 +34,7 @@
   
   // districts 資訊 
   $town = [];
-  $pathJson = '/var/www/html/weather/backendtraining-t4/rainfallData/*.*';
+  $pathJson = '/var/www/html/weather/backendtraining-t4/whatever/*.*';
   foreach(glob($pathJson) as $jsonFileName){
     $fileName = pathinfo($jsonFileName, PATHINFO_FILENAME);   
     $splice = mb_substr($fileName,-2,2, 'UTF-8');
@@ -92,16 +92,21 @@ $db->schema()->create($tables, function(CreateTable $table){
 
 
 // $pathJsonRowData = '/var/www/html/weather/backendtraining-t4/rainfallData/';
-$pathJsonRowData = '/var/www/html/weather/backendtraining-t4/whatever';
+// $pathJsonRowData = '/var/www/html/weather/backendtraining-t4/whatever';
 // many jsonfile push into $rainfallData array
 $rainfallData = [];
-foreach (new DirectoryIterator($pathJsonRowData) as $file) {
-  if ($file->getExtension() === 'json') {
-    $data = json_decode(file_get_contents($file->getPathname()), true);
-    $fileName = pathinfo($file->getFilename(), PATHINFO_FILENAME);   
-    $splice = mb_substr($fileName,-5,5, 'UTF-8');
+foreach (glob($pathJson) as $jsonFileName) {
+   $fileName = pathinfo($jsonFileName, PATHINFO_FILENAME);
+   $splice = mb_substr($fileName,-5,5, 'UTF-8');
+
+   if(!str_contains("$splice","區")){
+    $splice = $splice.'區';
+   }
+    $data = json_decode(file_get_contents($jsonFileName), true);
+       
+    
     $rainfallData[$splice] = $data;
-  }
+  
 }
 // print_r($rainfallData);
 // print_r($rainfallData['apple']);
