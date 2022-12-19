@@ -161,7 +161,16 @@ class DatabaseController implements RainfallSchema, CollectData
     }
 // CollectData
     public function showDistricts(): array{
-        $result = ['Creating...'];
+        $town = $this->db->from($this->districtsTableName)->select(['name'])->all();
+
+        foreach($town as $key => $value){
+            foreach($value as $subKey => $subValue){
+              $townName[] = $subValue;
+            }
+        }
+
+        $stdDistrictSort = CollectData::BASE_DISTRICTS;
+        $result = array_intersect($stdDistrictSort, $townName);
         return $result;
     }
 
