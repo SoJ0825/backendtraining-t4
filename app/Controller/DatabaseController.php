@@ -60,30 +60,24 @@ class DatabaseController implements RainfallSchema, CollectData
        echo "Catch  Create Districts table" .PHP_EOL;
     }
 
-    public function importData(){
-      $this->createRainfallsTable(); 
-      $this->createDistrictsTable();
+    public function importData()
+    {
+       $this->createRainfallsTable();
+       $this->createDistrictsTable();
 
-      $tables = $this->schema->getTables(); 
-      echo PHP_EOL."Databases table list: ".PHP_EOL;  
-      foreach ($tables as $key => $value){
-        echo $value.PHP_EOL;
-      }
-      
-     // Check databases have any tables?   
-       // Databases have no tables
-         // Create rainfallTable and districtTable, then import data
-       // Databases have tables
-         // 1.
-         // have rainfallTable and districtTable, clear two table's row data, then import data 
-         // 2.
-         // have rainfallTable, clear table's all row data, then import data 
-         // Create districtTable, then import data
-         // 3.
-         // have districtTable, clear table's all row data, then import data
-         // Create rainfallTable, then import data
-         
+       $tableList = $this->schema->getTables();
+       $totalTables = count($tableList);
 
+       // Check databases have tables?
+       if ($totalTables !== 2) {
+           // Databases have no tables
+           echo "Databases have tables" . PHP_EOL;
+           // Create rainfallTable and districtTable, then import data
+       } else {
+           // Databases have rainfallTable and districtTable
+           echo "Databases have tables" . PHP_EOL;
+           // Clear two table's row data,  then import data
+       }
     }
 // CollectData
     public function showDistricts(): array{
