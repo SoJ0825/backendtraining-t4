@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c883e34e84a19676d38cd294f506790c",
+    "content-hash": "c79a6ff33469d2ed76da778f1265a706",
     "packages": [
         {
             "name": "graham-campbell/result-type",
@@ -70,29 +70,30 @@
         },
         {
             "name": "opis/database",
-            "version": "4.0.0",
+            "version": "4.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/opis/database.git",
-                "reference": "f420da08fdbfc39aad2573254c09db1121cca4e1"
+                "reference": "5f6839e75ff04e878ec6aec880df935c3061af20"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/opis/database/zipball/f420da08fdbfc39aad2573254c09db1121cca4e1",
-                "reference": "f420da08fdbfc39aad2573254c09db1121cca4e1",
+                "url": "https://api.github.com/repos/opis/database/zipball/5f6839e75ff04e878ec6aec880df935c3061af20",
+                "reference": "5f6839e75ff04e878ec6aec880df935c3061af20",
                 "shasum": ""
             },
             "require": {
-                "php": ">=7.0.0"
+                "ext-pdo": "*",
+                "php": "^7.0"
             },
             "require-dev": {
-                "phpunit/phpunit": "^6.5",
+                "phpunit/phpunit": "^6.5 || ^7.0",
                 "symfony/yaml": "^3.4"
             },
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "4.0.x-dev"
+                    "dev-master": "4.1.x-dev"
                 }
             },
             "autoload": {
@@ -108,10 +109,14 @@
                 {
                     "name": "Marius Sarca",
                     "email": "marius.sarca@gmail.com"
+                },
+                {
+                    "name": "Sorin Sarca",
+                    "email": "sarca_sorin@hotmail.com"
                 }
             ],
             "description": "A database abstraction layer over PDO, that provides a powerful and intuitive query builder, bundled with an easy to use schema builder",
-            "homepage": "http://opis.io",
+            "homepage": "https://opis.io/database",
             "keywords": [
                 "Abstraction Layer",
                 "database",
@@ -125,9 +130,9 @@
             ],
             "support": {
                 "issues": "https://github.com/opis/database/issues",
-                "source": "https://github.com/opis/database/tree/master"
+                "source": "https://github.com/opis/database/tree/4.2.1"
             },
-            "time": "2018-06-05T09:56:12+00:00"
+            "time": "2021-04-14T19:33:16+00:00"
         },
         {
             "name": "phpoption/phpoption",

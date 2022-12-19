@@ -1,0 +1,6 @@
+[19-Dec-2022 16:01:50 Asia/Taipei] PHP Fatal error:  Uncaught PDOException: SQLSTATE[HY000] [1049] Unknown database 'training_weather' in /Users/mia/Sites/backendtraining-t4/APP/Core/Database/DB.php:59
+Stack trace:
+#0 /Users/mia/Sites/backendtraining-t4/APP/Core/Database/DB.php(59): PDO->__construct('mysql:host=loca...', 'mia', 'dbbb2635')
+#1 /Users/mia/Sites/backendtraining-t4/index.php(12): App\Core\Database\DB->pdo()
+#2 {main}
+  thrown in /Users/mia/Sites/backendtraining-t4/APP/Core/Database/DB.php on line 59
