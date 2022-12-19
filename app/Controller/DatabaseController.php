@@ -54,48 +54,206 @@ class DatabaseController implements CollectData, RainfallSchema
             return $result ;
     }
         
+    public function sumByYearAll($district = null):array
+    {
+        // $result =[];
+        $max0 = $this->db->from('rainfalls')->max('datetime');
+        $min0 = $this->db->from('rainfalls')->min('datetime');
+        // echo substr($max0,0,4).substr($min0,0,4);
+        $max=substr($max0,0,4);
+        $min=substr($min0,0,4);
         
+        $count_i=$this->db->from('districts')->count('district');
+        // echo $count_i;
+        $j=$min;
+        for($i=0;$i<$count_i;$i++){
+            for($j=$min;$j<$max+1;$j++){
+        $count = $this->db->from('rainfalls')
+                ->Join('districts', function($join){
+                $join->on('rainfalls.districts', 'districts.district');
+            })
+            ->where('dis_id')->is($i+1)
+            ->andwhere('year')->is($j)
+            ->select(function($include){
+                $include->column('districts', '區名');
+                $include->column('year','年份');
+                $include->sum('rain', '總雨量');
+                $include->count('district', '資料筆數');                      
+            })
+    
+
+        ->fetchAssoc()
+        ->all();
+        
+        
+        
+        $result[$i][$j]=$count;         
+                }
+        }
+
+        return $result;
+    }    
     
             
     public function sumByYear($district = null): array
     {
-        $result = $this->db->from('districts')   
-             ->Join('rainfalls', function($join){
-               $join->on('rainfalls.districts', 'districts.district');
-             })
-            ->where('YEAR')->between(2015,2018)
-            ->groupBy('districts.dis_id','rainfalls.YEAR')
-            //  ->having('rainfalls.rain', function($column){
-            //    $column->sum();
-            //  })
-            ->select(function($include){
-                $include->count('districts.district', '資料筆數')
-                        ->sum('rainfalls.rain', 'total_rainfalls')
-                        ->column('rainfalls.YEAR')
-                        ->column('rainfalls.districts', 'name');
-              })
-            //  ->select()
-             ->all();
-              
+        if($district){
+        $result = $this->db->from('rainfalls')   
+                ->Join('districts', function($join){
+                $join->on('rainfalls.districts', 'districts.district');
+                })
+                ->where('district')->is($district)    
+                ->orderBy('rainfalls.year')
+                // ->groupBy('districts.districts')
+                ->groupBy('year')
+                ->select(function($include){
+                    $include->column('districts', '區名');
+                    $include->column('year','年份');
+                    $include->sum('rain', '總雨量');
+                    $include->count('district', '資料筆數');                      
+                })
+                ->fetchAssoc()
+                ->all();
+        
         return $result;
+        }
+        else{
+            $max0 = $this->db->from('rainfalls')->max('datetime');
+            $min0 = $this->db->from('rainfalls')->min('datetime');
+            // echo substr($max0,0,4).substr($min0,0,4);
+            $max=substr($max0,0,4);
+            $min=substr($min0,0,4);
+            
+            $count_i=$this->db->from('districts')->count('district');
+            // echo $count_i;
+            $j=$min;
+            for($i=0;$i<$count_i;$i++){
+                for($j=$min;$j<$max+1;$j++){
+            $count = $this->db->from('rainfalls')
+                    ->Join('districts', function($join){
+                    $join->on('rainfalls.districts', 'districts.district');
+                })
+                ->where('dis_id')->is($i+1)
+                ->andwhere('year')->is($j)
+                ->select(function($include){
+                    $include->column('districts', '區名');
+                    $include->column('year','年份');
+                    $include->sum('rain', '總雨量');
+                    $include->count('district', '資料筆數');                      
+                })
+        
+    
+            ->fetchAssoc()
+            ->all();
+            
+            
+            
+            $result[$i][$j]=$count;         
+                    }
+            }
+    
+            return $result;
+        }  
     }
+     
+    public function sumByMonthAll($district = null): array
+    {        
+            $count_i=$this->db->from('districts')->count('district');
+            // echo $count_i;
+            $j=0;
+            for($i=0;$i<$count_i;$i++){
+                for($j=0;$j<12;$j++){
+            $count = $this->db->from('rainfalls')
+                    ->Join('districts', function($join){
+                    $join->on('rainfalls.districts', 'districts.district');
+                })
+                ->where('dis_id')->is($i+1)
+                ->andwhere('month')->is($j)
+                ->select(function($include){
+                    $include->column('districts', '區名');
+                    $include->column('month','月份');
+                    $include->sum('rain', '總雨量');
+                    $include->count('district', '資料筆數');                      
+                })
+        
+    
+            ->fetchAssoc()
+            ->all();
+            
+            
+            
+            $result[$i][$j]=$count;         
+                    }
+            }
+    
+            return $result;
+        }  
+
 
     public function sumByMonth($district = null): array
     {
-
+        if($district){
+        $result = $this->db->from('rainfalls')   
+                ->Join('districts', function($join){
+                $join->on('rainfalls.districts', 'districts.district');
+                })
+                ->where('district')->is($district)
+                ->orderBy('rainfalls.month')
+                // ->groupBy('districts.dis_id')
+                ->groupBy('rainfalls.month')
+                // ->groupBy('rainfalls.year')
+                ->select(function($include){
+                    $include->column('rainfalls.districts', '區名');
+                    // $include->column('rainfalls.year','年份');
+                    $include->column('rainfalls.month','月份');
+                    $include->sum('rainfalls.rain', '總雨量');
+                 $include->count('districts.district', '資料筆數');                      
+                })
+                ->fetchAssoc()
+                ->all();
+                // foreach ($result as $district=>$user) {
+                //     return $user[$district];
+                // }
+            return $result;
+        }
+        else{
+            $count_i=$this->db->from('districts')->count('district');
+            $j=0;
+            for($i=0;$i<$count_i;$i++){
+                for($j=0;$j<12;$j++){
+            $count = $this->db->from('rainfalls')
+                    ->Join('districts', function($join){
+                    $join->on('rainfalls.districts', 'districts.district');
+                })
+                ->where('dis_id')->is($i+1)
+                ->andwhere('month')->is($j)
+                ->select(function($include){
+                    $include->column('districts', '區名');
+                    $include->column('month','月份');
+                    $include->sum('rain', '總雨量');
+                    $include->count('district', '資料筆數');                      
+                })  
+            ->fetchAssoc()
+            ->all();    
+            $result[$i][$j]=$count;         
+                    }
+            }
+            return $result;
+        }
     }
-
-    
 
     public function createRainfallsTable()
     {
             $this->db->schema()->create('rainfalls', function(CreateTable $table){
             $table->integer('id')->autoincrement();
-            $table->string('districts', 64)->index();
-            $table->integer('YEAR',4);
-            $table->integer('MONTH',2);
+            // $table->integer('dis_idno',2);
+            $table->string('districts', 64);
+            $table->string('year',4);
+            $table->string('month',2);
             $table->dateTime('datetime' , 20);
             $table->float('rain', 5);
+            // $table->foreign('dis_idno')
+            //       ->references('districts', 'idno');
             });
     }
 
@@ -103,17 +261,16 @@ class DatabaseController implements CollectData, RainfallSchema
     {
             $this->db->schema()->create('districts', function(CreateTable $table){
             $table->integer('dis_id')->autoincrement();
-            $table->string('district', 64)->index();
-            });
-    }
+            $table->string('district', 64);
+         });
+    }  
 
     public function importData()
     {
         //districts table
-        $result = $this->db->from('districts')
-             ->select()
-             ->all();
-        if(!$result){
+        $this->db->schema()->drop('districts');
+        $this->createDistrictsTable();
+        // if($result){
             $districtarr=self::BASE_DISTRICTS;
             $j=count($districtarr);
             for($i=0;$i<$j;$i++){
@@ -122,13 +279,12 @@ class DatabaseController implements CollectData, RainfallSchema
             ))
             ->into('districts');
             }
-        }
+        // }
         
         //rainfalls table
-        $result = $this->db->from('rainfalls')
-             ->select()
-             ->all();
-        if(!$result){
+        $this->db->schema()->drop('rainfalls');
+        $this->createrainfallsTable();
+        // if($result){
             foreach (glob("./rainfallData/*.json") as $filename) {
                 $arr[]=$filename;
             }
@@ -147,19 +303,21 @@ class DatabaseController implements CollectData, RainfallSchema
                     $str=$str;
                 }         
             foreach($data as $key=>$rain){
-                $str2=substr($key,0, 4);
+                // echo "'正在匯入'.$key".PHP_EOL;
+                // echo '======================='.PHP_EOL;
+                $str2=substr($key,0,4);
                 $str3=substr($key,5,2);
             $result=$this->db->insert(array(
                 'districts' => $str,
-                'YEAR' => $str2,
-                'MONTH' => $str3,
+                'year' => $str2,
+                'month' => $str3,
                 'datetime' => $key,
                 'rain' => $rain
            ))
            ->into('rainfalls');
             }}
             
-        }
+        // }
 
     }
 }

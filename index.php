@@ -9,9 +9,9 @@ use Dotenv\Dotenv;
 $dotenv = Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 $pdo = DB::init()->pdo();
-var_dump(4444);
+// var_dump(4444);
 $databaseController = new DatabaseController($pdo);
-var_dump(444);
+// var_dump(444);
 do {
     $command = strtolower(readline('重新匯入資料?[y/n/quit]: '));
     switch ($command) {
