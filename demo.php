@@ -169,6 +169,52 @@ foreach($town as $key => $value){
       $townName[] = $subValue;
     }
   }
-  print_r($townName);
+  // print_r($townName);
+  
+  // total rainfall of town by 2015 ~ 2018
+  $totalRainfall = $db->from(['rainfall'=>'r'])
+             ->Join('districts', function($join){
+                $join->on('r.name','districts.name' );
+             })->where('r.datetime')->between("2015-01-01 00:00:00","2018-12-31 23:59:59")->groupBy('r.name')
+             ->select(function($include){
+              $include->column('r.name');
+              $include->sum('r.rain', '總雨量');
+             })
+             ->all();
+  echo "分地區, 顯示「地區」 和 該地區 2015年 ~ 2018年 的「總合雨量」".PHP_EOL;print_r($totalRainfall);
+
+  // every year total rainfall of town (have no year)
+  for($year = 2015; $year<=2018; $year++){
+    $yearRainfall[] = $db->from(['rainfall'=>'r'])
+             ->Join('districts', function($join){
+                $join->on('r.name','districts.name' );
+             })->where('r.datetime')->between("$year-01-01 00:00:00","$year-12-31 23:59:59")->groupBy('r.name')
+             ->select(function($include){
+              $include->column('r.name');
+              // $include->column('r.datetime');
+              $include->sum('r.rain', 'rain');
+             })
+             ->all();
+    
+  }
+echo "分地區, 顯示「地區」 和 該地區 每年的「年度雨量總和」, 無法顯示 Year".PHP_EOL;print_r($yearRainfall);
+
+// 重構 $yearRainfall, 再將重構後的結果 ($result) 輸出
+// every year total rainfall of town (show every year)
+$result = [];
+$year = 2015;
+$i = 0;
+foreach($yearRainfall as $key => $value){
+  foreach($value as $subKey => $subValue){
+    foreach($subValue as $lastKey => $lastValue){
+    //  echo $key.PHP_EOL;
+    $result[$i]["$lastKey"] = $lastValue;
+    $result[$i]["year"] = $key + $year;
+    }
+    $i++;
+  }
+}
+echo "分地區, 顯示「地區」 和 該地區 每年的「年度雨量總和」、Year".PHP_EOL;print_r($result);
+
 
 
