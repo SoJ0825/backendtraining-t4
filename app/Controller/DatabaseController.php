@@ -25,7 +25,7 @@ class DatabaseController implements RainfallSchema, CollectData
 // table name
     private $rainfallsTableName = 'rainfall';
     private $districtsTableName = 'districts';
-    private $path = '/var/www/html/weather/backendtraining-t4/rainfallData/*.*';
+    private $path = '/var/www/html/weather/backendtraining-t4/whatever/*.*';
 // Methods
 // RainfallSchema
     public function __construct($pdo){
@@ -46,7 +46,7 @@ class DatabaseController implements RainfallSchema, CollectData
         $table->integer('id')->primary()->autoincrement();
         $table->string('name', 8);
         $table->dateTime('datetime');
-        $table->float('rainfall');
+        $table->float('rain');
         });
        echo "Catch  Create Rain table" .PHP_EOL;
     }
@@ -85,7 +85,7 @@ class DatabaseController implements RainfallSchema, CollectData
            $rainfallData = [];
            foreach (glob($this->path) as $jsonFileName) {
                 $fileName = pathinfo($jsonFileName, PATHINFO_FILENAME); 
-                $splice = mb_substr($fileName,-2,2, 'UTF-8');
+                $splice = mb_substr($fileName,-8,8, 'UTF-8');
 
                 if(!str_contains("$splice","區")){
                     $splice = $splice.'區';
@@ -131,7 +131,7 @@ class DatabaseController implements RainfallSchema, CollectData
                     $db->insert(array(
                         'name' => $name,
                         'datetime' => $date,
-                        'rainfall' => $rainfall
+                        'rain' => $rainfall
                         ))->into($tables);
                     }catch(Exception $e){
                     echo $e->getMessage();
@@ -144,7 +144,7 @@ class DatabaseController implements RainfallSchema, CollectData
             // import districts data use php
             foreach(glob($this->path) as $jsonFileName){
               $fileName = pathinfo($jsonFileName, PATHINFO_FILENAME);   
-              $splice = mb_substr($fileName,-2,2, 'UTF-8');
+              $splice = mb_substr($fileName,-8,8, 'UTF-8');
 
               if(!str_contains("$splice","區")){
                 $splice = $splice.'區';
@@ -169,18 +169,23 @@ class DatabaseController implements RainfallSchema, CollectData
             }
         }
 
-        $stdDistrictSort = CollectData::BASE_DISTRICTS;
+        // $stdDistrictSort = CollectData::BASE_DISTRICTS;
+        $stdDistrictSort = ['bana區', 'peach區', 'apple區',];
         $result = array_intersect($stdDistrictSort, $townName);
         return $result;
     }
 
     public function sumByYear($district = null): array{
-        $result = ['Creating...'];
+        // 全部行政區
+        // 指定行政區
+        $result = ['Creating...Year..'];
         return $result;
     }
 
     public function sumByMonth($district = null): array{
-        $result = ['Creating...'];
+        $result = ['Creating...Month..'];
         return $result;
+        // 全部行政區
+        // 指定行政區
     }
 }
