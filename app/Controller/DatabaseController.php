@@ -25,7 +25,7 @@ class DatabaseController implements RainfallSchema, CollectData
 // table name
     private $rainfallsTableName = 'rainfall';
     private $districtsTableName = 'districts';
-    private $path = '/var/www/html/weather/backendtraining-t4/whatever/*.*';
+    private $path = '/var/www/html/weather/backendtraining-t4/rainfallData/*.*';
 // Methods
 // RainfallSchema
     public function __construct($pdo){
@@ -85,7 +85,7 @@ class DatabaseController implements RainfallSchema, CollectData
            $rainfallData = [];
            foreach (glob($this->path) as $jsonFileName) {
                 $fileName = pathinfo($jsonFileName, PATHINFO_FILENAME); 
-                $splice = mb_substr($fileName,-8,8, 'UTF-8');
+                $splice = mb_substr($fileName,-2,2, 'UTF-8');
 
                 if(!str_contains("$splice","區")){
                     $splice = $splice.'區';
@@ -144,7 +144,7 @@ class DatabaseController implements RainfallSchema, CollectData
             // import districts data use php
             foreach(glob($this->path) as $jsonFileName){
               $fileName = pathinfo($jsonFileName, PATHINFO_FILENAME);   
-              $splice = mb_substr($fileName,-8,8, 'UTF-8');
+              $splice = mb_substr($fileName,-2,2, 'UTF-8');
 
               if(!str_contains("$splice","區")){
                 $splice = $splice.'區';
