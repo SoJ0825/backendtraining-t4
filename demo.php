@@ -181,7 +181,7 @@ foreach($town as $key => $value){
               $include->sum('r.rain', '總雨量');
              })
              ->all();
-  echo "分地區, 顯示「地區」 和 該地區 2015年 ~ 2018年 的「總合雨量」".PHP_EOL;print_r($totalRainfall);
+  // echo "分地區, 顯示「地區」 和 該地區 2015年 ~ 2018年 的「總合雨量」".PHP_EOL;print_r($totalRainfall);
 
   // every year total rainfall of town (have no year)
   for($year = 2015; $year<=2018; $year++){
@@ -197,7 +197,7 @@ foreach($town as $key => $value){
              ->all();
     
   }
-echo "分地區, 顯示「地區」 和 該地區 每年的「年度雨量總和」, 無法顯示 Year".PHP_EOL;print_r($yearRainfall);
+// echo "分地區, 顯示「地區」 和 該地區 每年的「年度雨量總和」, 無法顯示 Year".PHP_EOL;print_r($yearRainfall);
 
 // 重構 $yearRainfall, 再將重構後的結果 ($result) 輸出
 // every year total rainfall of town (show every year)
@@ -214,7 +214,20 @@ foreach($yearRainfall as $key => $value){
     $i++;
   }
 }
-echo "分地區, 顯示「地區」 和 該地區 每年的「年度雨量總和」、Year".PHP_EOL;print_r($result);
+// echo "分地區, 顯示「地區」 和 該地區 每年的「年度雨量總和」、Year".PHP_EOL;print_r($result);
 
+// Get year and month of rainfall
+$maxDatetime = $db->from('rainfall')->max('datetime');
+$maxYear = substr($maxDatetime, 0, 4);
+$minDatetime = $db->from('rainfall')->min('datetime');
+$minYear = substr($minDatetime, 0, 4);
+echo "min datetime: $minDatetime, max datetime: $maxDatetime".PHP_EOL;
+echo "min year: $minYear, max year: $maxYear".PHP_EOL;
+for($year = $minYear; $year <= $maxYear; $year++){
+  for($i = 1; $i<=12; $i++){
+    $month = strlen($i)==1? "0$i":"$i";
+    echo "$year-$month-01 00:00:00 ~ $year-$month-31 23:59:59".PHP_EOL;
+  }
+}
 
 
