@@ -18,7 +18,8 @@ class DB extends SingletonDB
     {
         // try {
             $dsn = 'mysql:host=' . $_ENV['DB_HOST'] . ';dbname=' . $_ENV['DB_DATABASE'] ;
-            $pdo = new PDO($dsn, $_ENV['DB_USERNAME'], $_ENV['DB_PASSWORD']);
+            $pdo = new PDO($dsn, $_ENV['DB_USERNAME'], $_ENV['DB_PASSWORD'],[PDO::ATTR_DEFAULT_FETCH_MODE=>PDO::FETCH_ASSOC]);
+            
         //     var_dump(2);
         //     // $connection->getPDO();
         //     $connection = Connection::fromPDO($pdo);

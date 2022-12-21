@@ -9,14 +9,12 @@ use Opis\Database\Schema\CreateTable;
 
 class DatabaseController implements CollectData, RainfallSchema
 {   
-    // public $db;
     public function __construct($pdo)
     {   
         $connection = Connection::fromPDO($pdo);
         $this->db = new Database($connection);
         $this->createDistrictsTable(); 
         $this->createRainfallsTable();
-        
         // var_dump(44);
     }
     
@@ -24,7 +22,6 @@ class DatabaseController implements CollectData, RainfallSchema
     {   
         $conarr= self::BASE_DISTRICTS;
         $new=[];
-        // $test=[];
             foreach (glob("./rainfallData/*.json") as $filename) {
                 $arr[]=$filename;
             }
@@ -56,7 +53,6 @@ class DatabaseController implements CollectData, RainfallSchema
         
     // public function sumByYearAll($district = null):array
     // {
-    //     // $result =[];
     //     $max0 = $this->db->from('rainfalls')->max('datetime');
     //     $min0 = $this->db->from('rainfalls')->min('datetime');
     //     // echo substr($max0,0,4).substr($min0,0,4);
@@ -73,19 +69,20 @@ class DatabaseController implements CollectData, RainfallSchema
     //             $join->on('rainfalls.districts', 'districts.district');
     //         })
     //         ->where('dis_id')->is($i+1)
-    //         ->andwhere('year')->is($j)
-    //         ->select(function($include){
-    //             $include->column('districts', '區名');
-    //             $include->column('year','年份');
-    //             $include->sum('rain', '總雨量');
-    //             $include->count('district', '資料筆數');                      
-    //         })
+    //         ->andwhere('year')->is($j);
+    //     //     ->select(function($include){
+    //     //         $include->column('districts', '區名');
+    //     //         $include->column('year','年份');
+    //     //         $include->sum('rain', '總雨量');
+    //     //         $include->count('district', '資料筆數');                      
+    //     //     })
     
 
-    //     ->fetchAssoc()
-    //     ->all();
+    //     // ->fetchAssoc()
+    //     // ->all();
         
-        
+    //     $count = $count->count->sum('rain');
+                
         
     //     $result[$i][$j]=$count;         
     //             }
@@ -104,7 +101,6 @@ class DatabaseController implements CollectData, RainfallSchema
                 })
                 ->where('district')->is($district)    
                 ->orderBy('rainfalls.year')
-                // ->groupBy('districts.districts')
                 ->groupBy('year')
                 ->select(function($include){
                     $include->column('districts', '區名');
@@ -141,17 +137,11 @@ class DatabaseController implements CollectData, RainfallSchema
                     $include->sum('rain', '總雨量');
                     $include->count('district', '資料筆數');                      
                 })
-        
-    
             ->fetchAssoc()
             ->all();
-            
-            
-            
             $result[$i][$j]=$count;         
                     }
             }
-    
             return $result;
         }  
     }
@@ -190,7 +180,8 @@ class DatabaseController implements CollectData, RainfallSchema
     //         ->fetchAssoc()
     //         ->all();
             
-            
+    //         $count = $count->count->sum('rain');
+    //         print_r($count);
             
     //         $result[$i][$j][$k]=$count; 
     //                         }        
@@ -211,17 +202,13 @@ class DatabaseController implements CollectData, RainfallSchema
         if($district){
             for($j=$min;$j<$max+1;$j++){
                 for($k=1;$k<13;$k++){
-        $count = $this->db->from('rainfalls')   
-                ->Join('districts', function($join){
-                $join->on('rainfalls.districts', 'districts.district');
+                $count = $this->db->from('rainfalls')   
+                        ->Join('districts', function($join){
+                        $join->on('rainfalls.districts', 'districts.district');
                 })
                 ->where('district')->is($district)
                 ->andwhere('year')->is($j)
                 ->andwhere('month')->is($k)
-                // ->orderBy('rainfalls.month')
-                // ->groupBy('districts.dis_id')
-                // ->groupBy('rainfalls.month')
-                // ->groupBy('rainfalls.year')
                 ->select(function($include){
                     $include->column('districts', '區名');
                     $include->column('year','年份');
@@ -241,9 +228,9 @@ class DatabaseController implements CollectData, RainfallSchema
             for($i=1;$i<=$count_i;$i++){
                 for($j=$min;$j<$max+1;$j++){
                     for($k=1;$k<13;$k++){
-            $count = $this->db->from('rainfalls')
-                    ->Join('districts', function($join){
-                    $join->on('rainfalls.districts', 'districts.district');
+                    $count = $this->db->from('rainfalls')
+                            ->Join('districts', function($join){
+                            $join->on('rainfalls.districts', 'districts.district');
                 })
                 ->where('dis_id')->is($i)
                 ->andwhere('year')->is($j)
@@ -261,7 +248,6 @@ class DatabaseController implements CollectData, RainfallSchema
                             }        
                        }
                 }
-    
                 return $result;
             }
         }
@@ -270,14 +256,11 @@ class DatabaseController implements CollectData, RainfallSchema
     {
             $this->db->schema()->create('rainfalls', function(CreateTable $table){
             $table->integer('id')->autoincrement();
-            // $table->integer('dis_idno',2);
             $table->string('districts', 64);
             $table->string('year',4);
             $table->string('month',2);
             $table->dateTime('datetime' , 20);
             $table->float('rain', 5);
-            // $table->foreign('dis_idno')
-            //       ->references('districts', 'idno');
             });
     }
 
@@ -341,12 +324,6 @@ class DatabaseController implements CollectData, RainfallSchema
            ))
            ->into('rainfalls');
             }
-            // foreach($arr as $key=>$value){
-
-                // }
             }
-            
-        // }
-
     }
 }
