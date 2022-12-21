@@ -230,30 +230,28 @@ for($year = $minYear; $year <= $maxYear; $year++){
   }
 }
 
-// Every month total rainfall of town has 'Incorrect DATETIME value'
+// Every month total rainfall of town by rainfall.name = '仁德區'
 for($year = $minYear; $year <= $maxYear; $year++){
   for($i = 1; $i <= 12; $i++){
-    $month = strlen($i)==1? "0$i":"$i";
-    $monthRainfall[] = $db->from(['rainfall'=>'r'])
-           ->Join('districts', function($join){
-              $join->on('r.name','districts.name' );
+    $date = cal_days_in_month(CAL_GREGORIAN, $i, $year);
+    $monthRain = $db->from(['districts'=>'d'])
+           ->leftJoin('rainfall', function($join){
+              $join->on('rainfall.name','d.name' );
            })
-           ->where('r.datetime')->between("$year-$i-01 00:00:00","$year-$i-31 23:59:59")->andwhere('r.name')->is('仁德區')
-           ->groupBy('r.name')
-           ->select(function($include){
-            $include->column('r.name');
-            // $include->column('r.datetime');
-            $include->sum('r.rain', 'rain');
-           }) ->all();
+           ->where('rainfall.datetime')->between("$year-$i-01 00:00:00","$year-$i-$date 23:59:59")->andwhere('rainfall.name')->is('仁德區')->sum('rainfall.rain');
+    //  echo "Hi: $monthRain".PHP_EOL;
+    $monthRainfall['rainfall'][$year][$i] = $monthRain;
    }
-  
 }
 print_r($monthRainfall);
 
 // HardCode
-$monthRain = $db->from('districts')
-           ->leftJoin('rainfall', function($join){
-              $join->on('rainfall.name','districts.name' );
-           })->where('rainfall.datetime')->between("2018-06-01 00:00:00","2018-06-30 23:59:59")->andwhere('rainfall.name')->is('仁德區')->sum('rainfall.rain');
-print_r($monthRain);
+// $monthRain = $db->from('districts')
+//            ->leftJoin('rainfall', function($join){
+//               $join->on('rainfall.name','districts.name' );
+//            })->where('rainfall.datetime')->between("2018-06-01 00:00:00","2018-06-30 23:59:59")->andwhere('rainfall.name')->is('仁德區')->sum('rainfall.rain');
+// print_r($monthRain);
+
+  
+
 
