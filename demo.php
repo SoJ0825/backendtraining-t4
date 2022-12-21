@@ -231,27 +231,62 @@ for($year = $minYear; $year <= $maxYear; $year++){
 }
 
 // Every month total rainfall of town by rainfall.name = '仁德區'
-for($year = $minYear; $year <= $maxYear; $year++){
-  for($i = 1; $i <= 12; $i++){
-    $date = cal_days_in_month(CAL_GREGORIAN, $i, $year);
-    $monthRain = $db->from(['districts'=>'d'])
-           ->leftJoin('rainfall', function($join){
-              $join->on('rainfall.name','d.name' );
-           })
-           ->where('rainfall.datetime')->between("$year-$i-01 00:00:00","$year-$i-$date 23:59:59")->andwhere('rainfall.name')->is('仁德區')->sum('rainfall.rain');
-    //  echo "Hi: $monthRain".PHP_EOL;
-    $monthRainfall['rainfall'][$year][$i] = $monthRain;
-   }
-}
-print_r($monthRainfall);
-
-// HardCode
-// $monthRain = $db->from('districts')
+// $distictName = '仁德區';
+// $count = 0;
+// for($year = $minYear; $year <= $maxYear; $year++){
+//   for($i = 1; $i <= 12; $i++){
+//     $date = cal_days_in_month(CAL_GREGORIAN, $i, $year);
+//     $monthRain = $db->from(['districts'=>'d'])
 //            ->leftJoin('rainfall', function($join){
-//               $join->on('rainfall.name','districts.name' );
-//            })->where('rainfall.datetime')->between("2018-06-01 00:00:00","2018-06-30 23:59:59")->andwhere('rainfall.name')->is('仁德區')->sum('rainfall.rain');
+//               $join->on('rainfall.name','d.name' );
+//            })
+//            ->where('rainfall.datetime')->between("$year-$i-01 00:00:00","$year-$i-$date 23:59:59")->sum('rainfall.rain');
+//     //  echo "Hi: $monthRain".PHP_EOL;
+//      $count++;
+//      $monthRainfall[$year][$i] = $monthRain;
+//     // $monthRainfall[$distictName][$year][$i] = $monthRain;
+
+//    }
+// }
+// echo $count.PHP_EOL;
+// print_r($monthRainfall);
+
+// Every month total rainfall of town group by rainfall.name 
+  for($year = $minYear; $year <= $maxYear; $year++){
+    for($i = 1; $i <= 12; $i++){
+      $date = cal_days_in_month(CAL_GREGORIAN, $i, $year);
+      $monthRain[] = $db->from(['rainfall'=>'r'])
+            ->Join('districts', function($join){
+                $join->on('r.name','districts.name' );
+            })->where('r.datetime')->between("$year-$i-01 00:00:00","$year-$i-$date 23:59:59")
+            ->groupBy('r.name')
+            ->select(function($include){
+              $include->column('r.name');
+              $include->sum('r.rain', '總雨量');
+             })
+             ->all();
+    }
+  }
+
+// $count = count($monthRain); 
+// echo $count.PHP_EOL; //108
 // print_r($monthRain);
 
+// 重構 $monthRain, 再將重構後的結果 ($monthRainfall) 輸出
+// every month total rainfall of town (show every year & month)
+$monthRinfall = [];
+$year = $minYear;
+$i = 0;
+foreach($monthRain as $key => $value){
+  foreach($value as $subKey => $subValue){
+    foreach($subValue as $lastKey => $lastValue){
+    $monthRainfall[$i]["$lastKey"] = $lastValue;
+    $monthRainfall[$i]["year"] = intval($key/12)+$year;
+    $monthRainfall[$i]["month"] = ($key%12)+1; 
+    }
+     $i++;
+  }
   
-
+}
+print_r($monthRainfall);
 
