@@ -26,6 +26,7 @@ class DatabaseController implements RainfallSchema, CollectData
     private $rainfallsTableName = 'rainfall';
     private $districtsTableName = 'districts';
     private $path = '/var/www/html/weather/backendtraining-t4/rainfallData/*.*';
+    private $minYear, $maxYear;
 // Methods
 // RainfallSchema
     public function __construct($pdo){
@@ -34,6 +35,8 @@ class DatabaseController implements RainfallSchema, CollectData
             $this->pdo = $pdo;
             $this->db = DB::init()->database();
             $this->schema = $this->db->schema();
+            $this->minYear = $this->db->from('rainfall')->min('datetime');
+            $this->maxYear = $this->db->from('rainfall')->max('datetime');
         }catch(Exception $e){
             echo $e->getMessage();
         }
@@ -41,7 +44,6 @@ class DatabaseController implements RainfallSchema, CollectData
 
     public function createRainfallsTable(){
         $tables = $this->rainfallsTableName;
-        $this->schema->drop($tables);
         $this->schema->create($tables, function(CreateTable $table){
         $table->integer('id')->primary()->autoincrement();
         $table->string('name', 8);
@@ -53,33 +55,37 @@ class DatabaseController implements RainfallSchema, CollectData
 
     public function createDistrictsTable(){
         $tables = $this->districtsTableName;
-        $this->schema->drop($tables);
         $this->schema->create($tables, function(CreateTable $table){
             $table->integer('id')->primary()->autoincrement();
             $table->string('name', 8);
         });
-       echo "Catch  Create Districts table" .PHP_EOL;
+       echo "Catch Create Districts table".PHP_EOL;
+       
     }
 
     public function importData()
     {
-       $this->createRainfallsTable();
-       $this->createDistrictsTable();
-
        $tableList = $this->schema->getTables();
        $totalTables = count($tableList);
 
        // Check databases have tables?
        if ($totalTables !== 2) {
            // Databases have no tables
-           echo "Databases have tables" . PHP_EOL;
-           // Create rainfallTable and districtTable, then import data
+           echo "Databases have no tables" . PHP_EOL;
+           // Create rainfallTable and districtTabled
+           $this->createRainfallsTable();
+           $this->createDistrictsTable();
+           // then import data
        } else {
            // Databases have rainfallTable and districtTable
-           echo "Databases have tables" . PHP_EOL;
+           echo "Databases have tables." . PHP_EOL;
+           echo "Clear row data.".PHP_EOL;
            // Clear two table's row data 
            $this->schema->truncate($this->rainfallsTableName);
            $this->schema->truncate($this->districtsTableName);
+           echo "Databases reimport data!".PHP_EOL;
+           
+
            // Then import data
            // import rainfallTable data use php
            $rainfallData = [];
@@ -139,6 +145,7 @@ class DatabaseController implements RainfallSchema, CollectData
                 }
             echo "Insert RainfallData into MySQL Sucess!".PHP_EOL;
             }  
+
             importData($refactorRainfallData, $this->db, $this->rainfallsTableName);
 
             // import districts data use php
@@ -169,8 +176,7 @@ class DatabaseController implements RainfallSchema, CollectData
             }
         }
 
-        // $stdDistrictSort = CollectData::BASE_DISTRICTS;
-        $stdDistrictSort = ['bana區', 'peach區', 'apple區',];
+        $stdDistrictSort = CollectData::BASE_DISTRICTS;
         $result = array_intersect($stdDistrictSort, $townName);
         return $result;
     }
@@ -178,14 +184,15 @@ class DatabaseController implements RainfallSchema, CollectData
     public function sumByYear($district = null): array{
         // 全部行政區
         // 指定行政區
-        $result = ['Creating...Year..'];
+        $result ['sumByYear'][]= $district;
         return $result;
     }
 
     public function sumByMonth($district = null): array{
-        $result = ['Creating...Month..'];
-        return $result;
         // 全部行政區
         // 指定行政區
+        $result ['sumByMonth'][]= $district;
+        return $result;
+        
     }
 }
