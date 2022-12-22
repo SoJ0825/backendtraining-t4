@@ -35,8 +35,8 @@ class DatabaseController implements RainfallSchema, CollectData
             $this->pdo = $pdo;
             $this->db = DB::init()->database();
             $this->schema = $this->db->schema();
-            $this->minYear = $this->db->from('rainfall')->min('datetime');
-            $this->maxYear = $this->db->from('rainfall')->max('datetime');
+            $this->minYear = substr($this->db->from('rainfall')->min('datetime'), 0, 4);
+            $this->maxYear = substr($this->db->from('rainfall')->max('datetime'), 0, 4);
         }catch(Exception $e){
             echo $e->getMessage();
         }
@@ -182,9 +182,69 @@ class DatabaseController implements RainfallSchema, CollectData
     }
 
     public function sumByYear($district = null): array{
-        // 全部行政區
         // 指定行政區
-        $result ['sumByYear'][]= $district;
+        if(isset($district)){
+
+            // $town = var_dump($district);
+            // $town = $district;
+            for($year = $this->minYear; $year<=$this->maxYear; $year++){
+              $yearRain[] = $this->db->from(['rainfall'=>'r'])
+              ->Join('districts', function($join){
+                $join->on('r.name','districts.name');
+                })->where('r.datetime')->between("$year-01-01 00:00:00","$year-12-31 23:59:59")->andwhere('r.name')->is("$district")
+                ->groupBy('r.name')
+                ->select(function($include){
+                $include->column('r.name');
+                $include->sum('r.rain', 'rain');
+                })->all();
+            }
+            // print_r($yearRain);
+
+            // 重構 $yearRain 輸出: $yearRainfall
+            $i = 0;
+            $year = $this->minYear;
+            foreach($yearRain as $key => $value){
+                foreach($value as $subKey => $subValue){
+                    foreach($subValue as $lastKey => $lastValue){
+                        $yearRainfall[$i]["$lastKey"] = $lastValue;
+                        $yearRainfall[$i]["year"] = $key + $year;
+                    }
+                  $i++;
+                }
+            }
+            
+            $result[] = $yearRainfall;
+          
+        }else{
+        // 全部行政區
+        //   $result[] = 'total rainfall of town by year';
+        for($year = $this->minYear; $year<=$this->maxYear; $year++){
+              $yearRain[] = $this->db->from(['rainfall'=>'r'])
+              ->Join('districts', function($join){
+                $join->on('r.name','districts.name');
+                })->where('r.datetime')->between("$year-01-01 00:00:00","$year-12-31 23:59:59")
+                ->groupBy('r.name')
+                ->select(function($include){
+                $include->column('r.name');
+                $include->sum('r.rain', 'rain');
+                })->all();
+            }
+
+            // 重構 $yearRain 輸出: $yearRainfall
+            $i = 0;
+            $year = $this->minYear;
+            foreach($yearRain as $key => $value){
+                foreach($value as $subKey => $subValue){
+                    foreach($subValue as $lastKey => $lastValue){
+                        $yearRainfall[$i]["$lastKey"] = $lastValue;
+                        $yearRainfall[$i]["year"] = $key + $year;
+                    }
+                  $i++;
+                }
+            }
+            $result[] = $yearRainfall;
+        }
+        
         return $result;
     }
 
