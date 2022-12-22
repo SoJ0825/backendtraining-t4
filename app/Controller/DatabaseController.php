@@ -26,7 +26,7 @@ class DatabaseController implements RainfallSchema, CollectData
     private $rainfallsTableName = 'rainfall';
     private $districtsTableName = 'districts';
     private $path = '/var/www/html/weather/backendtraining-t4/rainfallData/*.*';
-    private $minYear, $maxYear;
+    private $minYear, $maxYear, $date;
 // Methods
 // RainfallSchema
     public function __construct($pdo){
@@ -249,10 +249,70 @@ class DatabaseController implements RainfallSchema, CollectData
     }
 
     public function sumByMonth($district = null): array{
-        // 全部行政區
-        // 指定行政區
-        $result ['sumByMonth'][]= $district;
-        return $result;
         
+         // 指定行政區
+        if(isset($district)){
+        // Every month total rainfall of town and group by rainfall.name 
+            for($year = $this->minYear; $year <= $this->maxYear; $year++){
+                for($i = 1; $i <= 12; $i++){
+                    $this->date = cal_days_in_month(CAL_GREGORIAN, $i, $year);
+                    $monthRain[] = $this->db->from(['rainfall'=>'r'])
+                    ->Join('districts', function($join){
+                    $join->on('r.name','districts.name' );
+                    })->where('r.datetime')->between("$year-$i-01 00:00:00","$year-$i-$this->date 23:59:59")
+                    ->andwhere('r.name')->is("$district")
+                    ->groupBy('r.name')
+                    ->select(function($include){
+                    $include->column('r.name');
+                    $include->sum('r.rain', '總雨量');
+                    })->all();
+                }
+            }
+            $monthRinfall = [];
+            $year = $this->minYear;
+            $i = 0;
+            foreach($monthRain as $key => $value){
+                foreach($value as $subKey => $subValue){
+                    foreach($subValue as $lastKey => $lastValue){
+                        $monthRainfall[$i]["$lastKey"] = $lastValue;
+                        $monthRainfall[$i]["year"] = intval($key/12)+$year;
+                        $monthRainfall[$i]["month"] = ($key%12)+1; 
+                    }
+                    $i++;
+                }
+            }
+            $result[] = $monthRainfall;
+        }else{
+        // 全部行政區
+            for($year = $this->minYear; $year <= $this->maxYear; $year++){
+                for($i = 1; $i <= 12; $i++){
+                    $this->date = cal_days_in_month(CAL_GREGORIAN, $i, $year);
+                    $monthRain[] = $this->db->from(['rainfall'=>'r'])
+                    ->Join('districts', function($join){
+                    $join->on('r.name','districts.name' );
+                    })->where('r.datetime')->between("$year-$i-01 00:00:00","$year-$i-$this->date 23:59:59")
+                    ->groupBy('r.name')
+                    ->select(function($include){
+                    $include->column('r.name');
+                    $include->sum('r.rain', '總雨量');
+                    })->all();
+                }
+            }
+            $monthRinfall = [];
+            $year = $this->minYear;
+            $i = 0;
+            foreach($monthRain as $key => $value){
+                foreach($value as $subKey => $subValue){
+                    foreach($subValue as $lastKey => $lastValue){
+                        $monthRainfall[$i]["$lastKey"] = $lastValue;
+                        $monthRainfall[$i]["year"] = intval($key/12)+$year;
+                        $monthRainfall[$i]["month"] = ($key%12)+1; 
+                    }
+                    $i++;
+                }
+            }
+            $result[] = $monthRainfall;
+        }
+        return $result;
     }
 }
