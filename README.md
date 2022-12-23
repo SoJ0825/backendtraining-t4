@@ -1,3 +1,11 @@
+# 實做內容～20221221
+1. 學習dotenv，修改composer.json ,使用PSR-4的autoload，了解function pdo(): PDO的含意，使其成功連上資料庫。
+2. 使用glob()找出json檔名，使用for迴圈，substr()塞入"區"字,最後用array_intersect()和題目要求的排序取交集。
+3. function importData()創建地區表和雨量表，並寫入簡單的terminal output等待畫面。
+4. sumByYear&sumByMonth，在指定行政區查詢部份，Year使用2次for迴圈、Month使用3次for迴圈，分別依地區、年、月印出查詢資料。
+5. 參考文件：OPIS Database、dotenv、PSR-4: Autoloader、SQL語法相關書籍。
+
+
 # 題目
 1. 請將台南市各區的降雨資訊(json file)，解析並儲存進 MySQL database。  
 2. 為了練習 SQL Join，請至少設計兩個表格，一個放區域名稱，一個放降雨資訊。  

@@ -8,11 +8,8 @@ use Dotenv\Dotenv;
 //預設使用 dotenv
 $dotenv = Dotenv::createImmutable(__DIR__);
 $dotenv->load();
-
 $pdo = DB::init()->pdo();
-
 $databaseController = new DatabaseController($pdo);
-
 do {
     $command = strtolower(readline('重新匯入資料?[y/n/quit]: '));
     switch ($command) {
