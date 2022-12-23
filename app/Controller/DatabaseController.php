@@ -47,45 +47,6 @@ class DatabaseController implements RainfallSchema, CollectData
                 echo $e->getMessage();
             }
         }
-        // Anonymous function
-        // $this->transpose = function ($rainfallData) {
-        //     $i = 0;
-        //     $result = [];
-        //     foreach ($rainfallData as $town => $rowdata) {
-        //         foreach ($rowdata as $key => $value) {
-        //             // 地區
-        //             $result[$i][0] = $town;
-        //             // 日期
-        //             $result[$i][1] = $key;
-        //             // 地區
-        //             $result[$i][2] = $value;
-        //             $i++;
-        //         }
-        //     }
-        //     return $result;
-        // };
-
-        // $this->importRainfallData = function ($refactorRainfallData, $db, $tables) {
-        //     $refactorRainfallDataKey = count($refactorRainfallData);
-        //     for ($i = 0; $i < $refactorRainfallDataKey; $i++) {
-        //         $name = $refactorRainfallData[$i][0];
-        //         $date = $refactorRainfallData[$i][1];
-        //         $rainfall = $refactorRainfallData[$i][2];
-
-        //         // echo "name: $name, date: $date, rainfall: $rainfall".PHP_EOL;
-
-        //         try {
-        //             $db->insert(array(
-        //                 'name' => $name,
-        //                 'datetime' => $date,
-        //                 'rain' => $rainfall
-        //             ))->into($tables);
-        //         } catch (Exception $e) {
-        //             echo $e->getMessage();
-        //         }
-        //     }
-        //     echo "Insert RainfallData into MySQL Sucess!" . PHP_EOL;
-        // };  
     }
 
     public function splice($path)
@@ -101,6 +62,44 @@ class DatabaseController implements RainfallSchema, CollectData
         }
         return $result;
     }
+
+    public function transpose($rainfallData) {
+            $i = 0;
+            $result = [];
+            foreach ($rainfallData as $town => $rowdata) {
+                foreach ($rowdata as $key => $value) {
+                    // 地區
+                    $result[$i][0] = $town;
+                    // 日期
+                    $result[$i][1] = $key;
+                    // 地區
+                    $result[$i][2] = $value;
+                    $i++;
+                }
+            }
+            return $result;
+    }
+
+    public function importRainfall($refactorRainfallData, $db, $tables)
+    {
+        $refactorRainfallDataKey = count($refactorRainfallData);
+        for ($i = 0; $i < $refactorRainfallDataKey; $i++) {
+            $name = $refactorRainfallData[$i][0];
+            $date = $refactorRainfallData[$i][1];
+            $rainfall = $refactorRainfallData[$i][2];
+
+            try {
+                $db->insert(array(
+                    'name' => $name,
+                    'datetime' => $date,
+                    'rain' => $rainfall
+                ))->into($tables);
+            } catch (Exception $e) {
+                echo $e->getMessage();
+            }
+        }
+        echo "Insert RainfallData into MySQL Sucess!" . PHP_EOL;
+    } 
 
     public function createRainfallsTable(){
         $tables = $this->rainfallsTableName;
@@ -138,20 +137,20 @@ class DatabaseController implements RainfallSchema, CollectData
 
            // then import data
            // import rainfallTable data use php
-        //    $rainfallData = [];
-        //     foreach (glob($this->path) as $jsonFileName) {
-        //         $jsonString = file_get_contents($jsonFileName);
-        //         $data = json_decode($jsonString, true);
-        //         // use Anonymous function $this->splice
-        //         foreach (($this->splice) as $town) {
-        //             $rainfallData[$town] = $data;
-        //         }
-        //     }
+           $rainfallData = [];
+            foreach (glob($this->path) as $jsonFileName) {
+                $jsonString = file_get_contents($jsonFileName);
+                $data = json_decode($jsonString, true);
+                // use Anonymous function $this->splice
+                foreach ($this->splice($this->path) as $town) {
+                    $rainfallData[$town] = $data;
+                }
+            }
               
            // 重構 rainfallData 內容
             //$refactorRainfallData insert into mysql
-            // $refactorRainfallData = $this->transpose;
-            // $this->importData($refactorRainfallData, $this->db, $this->rainfallsTableName);
+            $refactorRainfall = $this->transpose($rainfallData);
+            $this->importRainfall($refactorRainfall, $this->db, $this->rainfallsTableName);
 
             // import districts data use php
             foreach ($this->splice($this->path) as $town) {
@@ -160,6 +159,7 @@ class DatabaseController implements RainfallSchema, CollectData
                     'name' => $town
                 ))->into($this->districtsTableName);
             }
+            echo "Insert DistrictsData into MySQL Sucess!".PHP_EOL;
        } 
     // else {
 
