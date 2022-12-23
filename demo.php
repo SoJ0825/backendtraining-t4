@@ -305,7 +305,61 @@ $splice = function($path){
   return $result;
 };
 // var_dump($splice($path));
-foreach($splice($path) as $town){
-  $db->insert(array(
-  'name' => $town))->into('districts');
+// foreach($splice($path) as $town){
+//   $db->insert(array(
+//   'name' => $town))->into('districts');
+// }
+
+foreach(glob($path) as $jsonFileName){
+  $jsonString = file_get_contents($jsonFileName);
+  $data = json_decode($jsonString, true);
+  foreach($splice($path) as $town){
+    $rainfallData[$town] = $data;
+  }
 }
+// var_dump($rainfallData);
+
+function transpose($rainfallData){
+  $i = 0;
+  $result = [];
+  foreach($rainfallData as $town => $rowdata){
+    foreach($rowdata as $key => $value){
+    // 地區
+    $result[$i][0] = $town;
+    // 日期
+    $result[$i][1] = $key;
+    // 地區
+    $result[$i][2] = $value;
+    $i++; 
+    }
+  }
+  return $result; 
+}
+
+// $refactorRainfallData insert into mysql
+$refactorRainfallData = transpose($rainfallData);
+print_r($refactorRainfallData);
+function importRainfallData($refactorRainfallData, $db, $tables)
+{
+
+  $refactorRainfallDataKey = count($refactorRainfallData);
+  for ($i = 0; $i < $refactorRainfallDataKey; $i++) {
+    $name = $refactorRainfallData[$i][0];
+    $date = $refactorRainfallData[$i][1];
+    $rainfall = $refactorRainfallData[$i][2];
+
+    // echo "name: $name, date: $date, rainfall: $rainfall".PHP_EOL;
+
+    try {
+      $db->insert(array(
+        'name' => $name,
+        'datetime' => $date,
+        'rain' => $rainfall
+      ))->into($tables);
+    } catch (Exception $e) {
+      echo $e->getMessage();
+    }
+  }
+  echo "Insert RainfallData into MySQL Sucess!" . PHP_EOL;
+}  
+importRainfallData($refactorRainfallData, $db, 'rainfall');
