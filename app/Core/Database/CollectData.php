@@ -12,7 +12,7 @@ interface CollectData
     ];
 
     public function showDistricts(): array;
-
+            
     public function sumByYear($district = null): array;
 
     public function sumByMonth($district = null): array;

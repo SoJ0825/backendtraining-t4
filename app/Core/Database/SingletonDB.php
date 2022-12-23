@@ -1,9 +1,6 @@
 <?php
 
-
 namespace App\Core\Database;
-
-
 use PDO;
 
 abstract class SingletonDB
