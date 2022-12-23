@@ -25,7 +25,7 @@ class DatabaseController implements RainfallSchema, CollectData
 // table name
     private $rainfallsTableName = 'rainfall';
     private $districtsTableName = 'districts';
-    private $path = '/var/www/html/weather/backendtraining-t4/rainfallData/*.*';
+    private $path = '/var/www/html/weather/backendtraining-t4/whatever/*.*';
     private $minYear, $maxYear, $date;
 // Methods
 // RainfallSchema
@@ -38,7 +38,12 @@ class DatabaseController implements RainfallSchema, CollectData
             $this->minYear = substr($this->db->from('rainfall')->min('datetime'), 0, 4);
             $this->maxYear = substr($this->db->from('rainfall')->max('datetime'), 0, 4);
         }catch(Exception $e){
-            echo $e->getMessage();
+            $e = $e->getCode();
+            if($e==42) {
+                echo "並無檔案，請重新匯入資料！".PHP_EOL;
+            }else{
+                echo $e->getMessage();
+            }
         }
     }
 
@@ -75,23 +80,13 @@ class DatabaseController implements RainfallSchema, CollectData
            // Create rainfallTable and districtTabled
            $this->createRainfallsTable();
            $this->createDistrictsTable();
-           // then import data
-       } else {
-           // Databases have rainfallTable and districtTable
-           echo "Databases have tables." . PHP_EOL;
-           echo "Clear row data.".PHP_EOL;
-           // Clear two table's row data 
-           $this->schema->truncate($this->rainfallsTableName);
-           $this->schema->truncate($this->districtsTableName);
-           echo "Databases reimport data!".PHP_EOL;
-           
 
-           // Then import data
+           // then import data
            // import rainfallTable data use php
            $rainfallData = [];
            foreach (glob($this->path) as $jsonFileName) {
                 $fileName = pathinfo($jsonFileName, PATHINFO_FILENAME); 
-                $splice = mb_substr($fileName,-2,2, 'UTF-8');
+                $splice = mb_substr($fileName,-8,8, 'UTF-8');
 
                 if(!str_contains("$splice","區")){
                     $splice = $splice.'區';
@@ -151,7 +146,7 @@ class DatabaseController implements RainfallSchema, CollectData
             // import districts data use php
             foreach(glob($this->path) as $jsonFileName){
               $fileName = pathinfo($jsonFileName, PATHINFO_FILENAME);   
-              $splice = mb_substr($fileName,-2,2, 'UTF-8');
+              $splice = mb_substr($fileName,-8,8, 'UTF-8');
 
               if(!str_contains("$splice","區")){
                 $splice = $splice.'區';
@@ -164,6 +159,93 @@ class DatabaseController implements RainfallSchema, CollectData
             }
             echo "Insert DistrictsData into MySQL Sucess!".PHP_EOL;
 
+       } else {
+           // Databases have rainfallTable and districtTable
+           echo "Databases have tables." . PHP_EOL;
+           echo "Clear row data.".PHP_EOL;
+           // Clear two table's row data 
+           $this->schema->truncate($this->rainfallsTableName);
+           $this->schema->truncate($this->districtsTableName);
+           echo "Databases re-import data!".PHP_EOL;
+           
+
+           // Then import data
+           // import rainfallTable data use php
+           $rainfallData = [];
+           foreach (glob($this->path) as $jsonFileName) {
+                $fileName = pathinfo($jsonFileName, PATHINFO_FILENAME); 
+                $splice = mb_substr($fileName,-8,8, 'UTF-8');
+
+                if(!str_contains("$splice","區")){
+                    $splice = $splice.'區';
+                }
+
+                // $jsonString = file_get_contents($jsonFileName);
+                // $data = json_decode($jsonString, true);  
+                $data = json_decode(file_get_contents($jsonFileName), true);
+
+                $rainfallData[$splice] = $data;
+              
+           }
+           // 重構 rainfallData 內容
+           function transpose($rainfallData){
+                $i = 0;
+                $result = [];
+                foreach($rainfallData as $town => $rowdata){
+                    foreach($rowdata as $key => $value){
+                    // 地區
+                    $result[$i][0] = $town;
+                    // 日期
+                    $result[$i][1] = $key;
+                    // 地區
+                    $result[$i][2] = $value;
+                    $i++; 
+                    }
+                }
+               return $result; 
+            }
+            //$refactorRainfallData insert into mysql
+            $refactorRainfallData = transpose($rainfallData);
+            function importData($refactorRainfallData, $db, $tables){
+
+                $refactorRainfallDataKey = count($refactorRainfallData);
+                for($i = 0; $i < $refactorRainfallDataKey; $i++ ){
+                    $name = $refactorRainfallData[$i][0];
+                    $date = $refactorRainfallData[$i][1];
+                    $rainfall = $refactorRainfallData[$i][2];
+
+                    // echo "name: $name, date: $date, rainfall: $rainfall".PHP_EOL;
+
+                    try{
+                    $db->insert(array(
+                        'name' => $name,
+                        'datetime' => $date,
+                        'rain' => $rainfall
+                        ))->into($tables);
+                    }catch(Exception $e){
+                    echo $e->getMessage();
+                    }
+                }
+            echo "Insert RainfallData into MySQL Sucess!".PHP_EOL;
+            }  
+
+            importData($refactorRainfallData, $this->db, $this->rainfallsTableName);
+
+            // import districts data use php
+            foreach(glob($this->path) as $jsonFileName){
+              $fileName = pathinfo($jsonFileName, PATHINFO_FILENAME);   
+              $splice = mb_substr($fileName,-8,8, 'UTF-8');
+
+              if(!str_contains("$splice","區")){
+                $splice = $splice.'區';
+              }
+
+              // Insert into data to districts table
+              $this->db->insert(array(
+              'name' => $splice
+              ))->into($this->districtsTableName);
+            }
+            echo "Insert DistrictsData into MySQL Sucess!".PHP_EOL;
        }
     }
 // CollectData
@@ -175,8 +257,8 @@ class DatabaseController implements RainfallSchema, CollectData
               $townName[] = $subValue;
             }
         }
-
-        $stdDistrictSort = CollectData::BASE_DISTRICTS;
+        $stdDistrictSort = ['bana區', 'apple區', 'peach區',];
+        // $stdDistrictSort = CollectData::BASE_DISTRICTS;
         $result = array_intersect($stdDistrictSort, $townName);
         return $result;
     }
