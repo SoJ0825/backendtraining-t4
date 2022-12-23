@@ -147,7 +147,7 @@ class DatabaseController implements RainfallSchema, CollectData
                 }
             }
               
-           // 重構 rainfallData 內容
+            // 重構 rainfallData 內容
             //$refactorRainfallData insert into mysql
             $refactorRainfall = $this->transpose($rainfallData);
             $this->importRainfall($refactorRainfall, $this->db, $this->rainfallsTableName);
@@ -160,98 +160,44 @@ class DatabaseController implements RainfallSchema, CollectData
                 ))->into($this->districtsTableName);
             }
             echo "Insert DistrictsData into MySQL Sucess!".PHP_EOL;
-       } 
-    // else {
+       } else {
+            // Databases have rainfallTable and districtTable
+            echo "Databases have tables." . PHP_EOL;
+            echo "Clear row data." . PHP_EOL;
+            // Clear two table's row data 
+            $this->schema->truncate($this->rainfallsTableName);
+            $this->schema->truncate($this->districtsTableName);
+            echo "Databases re-import data!" . PHP_EOL;
 
-        //    // Databases have rainfallTable and districtTable
-        //    echo "Databases have tables." . PHP_EOL;
-        //    echo "Clear row data.".PHP_EOL;
-        //    // Clear two table's row data 
-        //    $this->schema->truncate($this->rainfallsTableName);
-        //    $this->schema->truncate($this->districtsTableName);
-        //    echo "Databases re-import data!".PHP_EOL;
-           
+            // Then import data
+            // import rainfallTable data use php
+            $rainfallData = [];
+            foreach (glob($this->path) as $jsonFileName) {
+                $jsonString = file_get_contents($jsonFileName);
+                $data = json_decode($jsonString, true);
+                // use Anonymous function $this->splice
+                foreach ($this->splice($this->path) as $town) {
+                    $rainfallData[$town] = $data;
+                }
+            }
 
-        //    // Then import data
-        //    // import rainfallTable data use php
-        //    $rainfallData = [];
-        //    foreach (glob($this->path) as $jsonFileName) {
-        //         $fileName = pathinfo($jsonFileName, PATHINFO_FILENAME); 
-        //         $splice = mb_substr($fileName,-8,8, 'UTF-8');
+            // 重構 rainfallData 內容
+            //$refactorRainfallData insert into mysql
+            $refactorRainfall = $this->transpose($rainfallData);
+            $this->importRainfall($refactorRainfall, $this->db, $this->rainfallsTableName);
 
-        //         if(!str_contains("$splice","區")){
-        //             $splice = $splice.'區';
-        //         }
-
-        //         // $jsonString = file_get_contents($jsonFileName);
-        //         // $data = json_decode($jsonString, true);  
-        //         $data = json_decode(file_get_contents($jsonFileName), true);
-
-        //         $rainfallData[$splice] = $data;
-              
-        //    }
-        //    // 重構 rainfallData 內容
-        //    function transpose($rainfallData){
-        //         $i = 0;
-        //         $result = [];
-        //         foreach($rainfallData as $town => $rowdata){
-        //             foreach($rowdata as $key => $value){
-        //             // 地區
-        //             $result[$i][0] = $town;
-        //             // 日期
-        //             $result[$i][1] = $key;
-        //             // 地區
-        //             $result[$i][2] = $value;
-        //             $i++; 
-        //             }
-        //         }
-        //        return $result; 
-        //     }
-        //     //$refactorRainfallData insert into mysql
-        //     $refactorRainfallData = transpose($rainfallData);
-        //     function importData($refactorRainfallData, $db, $tables){
-
-        //         $refactorRainfallDataKey = count($refactorRainfallData);
-        //         for($i = 0; $i < $refactorRainfallDataKey; $i++ ){
-        //             $name = $refactorRainfallData[$i][0];
-        //             $date = $refactorRainfallData[$i][1];
-        //             $rainfall = $refactorRainfallData[$i][2];
-
-        //             // echo "name: $name, date: $date, rainfall: $rainfall".PHP_EOL;
-
-        //             try{
-        //             $db->insert(array(
-        //                 'name' => $name,
-        //                 'datetime' => $date,
-        //                 'rain' => $rainfall
-        //                 ))->into($tables);
-        //             }catch(Exception $e){
-        //             echo $e->getMessage();
-        //             }
-        //         }
-        //     echo "Insert RainfallData into MySQL Sucess!".PHP_EOL;
-        //     }  
-
-        //     importData($refactorRainfallData, $this->db, $this->rainfallsTableName);
-
-        //     // import districts data use php
-        //     foreach(glob($this->path) as $jsonFileName){
-        //       $fileName = pathinfo($jsonFileName, PATHINFO_FILENAME);   
-        //       $splice = mb_substr($fileName,-8,8, 'UTF-8');
-
-        //       if(!str_contains("$splice","區")){
-        //         $splice = $splice.'區';
-        //       }
-
-        //       // Insert into data to districts table
-        //       $this->db->insert(array(
-        //       'name' => $splice
-        //       ))->into($this->districtsTableName);
-        //     }
-        //     echo "Insert DistrictsData into MySQL Sucess!".PHP_EOL;
-    //    }
+            // import districts data use php
+            foreach ($this->splice($this->path) as $town) {
+                // Insert into data to districts table
+                $this->db->insert(array(
+                    'name' => $town
+                ))->into($this->districtsTableName);
+            }
+            echo "Insert DistrictsData into MySQL Sucess!" . PHP_EOL;
+        }
     }
-// CollectData
+
+    // CollectData
     public function showDistricts(): array{
         $town = $this->db->from($this->districtsTableName)->select(['name'])->all();
 
@@ -270,8 +216,6 @@ class DatabaseController implements RainfallSchema, CollectData
         // 指定行政區
         if(isset($district)){
 
-            // $town = var_dump($district);
-            // $town = $district;
             for($year = $this->minYear; $year<=$this->maxYear; $year++){
               $yearRain[] = $this->db->from(['rainfall'=>'r'])
               ->Join('districts', function($join){
